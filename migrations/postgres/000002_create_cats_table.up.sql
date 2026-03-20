@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS cats(
+   ID BIGINT PRIMARY KEY,
+   created_at TIMESTAMPTZ,
+   updated_at TIMESTAMPTZ,
+   deleted_at TIMESTAMPTZ,
+   name TEXT NOT NULL,
+   age BIGINT NOT NULL,
+   owner BIGINT
+);

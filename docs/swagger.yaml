@@ -1,0 +1,267 @@
+definitions:
+  forms.CatForm:
+    properties:
+      age:
+        type: integer
+      name:
+        type: string
+    type: object
+  forms.UserForm:
+    properties:
+      active_rol:
+        $ref: '#/definitions/models.Rol'
+      email:
+        type: string
+      middlename:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      roles:
+        items:
+          $ref: '#/definitions/models.Rol'
+        type: array
+    required:
+    - password
+    type: object
+  forms.UserFormPostgres:
+    properties:
+      active_rol:
+        type: string
+      email:
+        type: string
+      middlename:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      roles:
+        items:
+          type: string
+        type: array
+    type: object
+  models.Cat:
+    properties:
+      _id:
+        type: string
+      age:
+        type: integer
+      name:
+        type: string
+      owner:
+        type: string
+    type: object
+  models.Login:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  models.Rol:
+    enum:
+    - admin
+    - regular
+    - all
+    type: string
+    x-enum-varnames:
+    - ADMIN
+    - REGULAR
+    - ALL
+  models.User:
+    properties:
+      _id:
+        type: string
+      active_rol:
+        $ref: '#/definitions/models.Rol'
+      created_at:
+        type: string
+      email:
+        type: string
+      middlename:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      phone:
+        type: string
+      roles:
+        items:
+          $ref: '#/definitions/models.Rol'
+        type: array
+    type: object
+info:
+  contact: {}
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Permite validar el usuario y contraseña en el sistema y generar
+        un token jwt. La solicitud entregara el token jwt, su fecha de expiración
+        y el usuario autenticado.
+      parameters:
+      - description: Credenciales de autenticación usach
+        in: body
+        name: loginData
+        required: true
+        schema:
+          $ref: '#/definitions/models.Login'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+      tags:
+      - Auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Permite cerrar la sesión del usuario, invalidando el token jwt
+        y eliminandolo de los token
+      produces:
+      - application/json
+      responses: {}
+      tags:
+      - Auth
+  /auth/refresh_token:
+    post:
+      consumes:
+      - application/json
+      description: Permite refrescar el token jwt en caso de que este se encuentre
+        caducado
+      produces:
+      - application/json
+      responses: {}
+      tags:
+      - Auth
+  /cat/:
+    get:
+      consumes:
+      - application/json
+      description: Permite obtener todos los gatos del sistema
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Gatos obtenidos con exito.
+      summary: Obtiene todos los gatos
+      tags:
+      - Gato
+    post:
+      consumes:
+      - application/json
+      description: Permite crear un gato en el sistema
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Gato creado con exito.
+          schema:
+            $ref: '#/definitions/forms.CatForm'
+      summary: Crea un gato
+      tags:
+      - Gato
+  /cat/postgres:
+    get:
+      consumes:
+      - application/json
+      description: Permite obtener todos los gatos del sistema
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Gatos obtenidos con exito.
+          schema:
+            items:
+              $ref: '#/definitions/models.Cat'
+            type: array
+      summary: Obtiene todos los gatos
+      tags:
+      - Gato
+    post:
+      consumes:
+      - application/json
+      description: Permite crear un gato en el sistema
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Gato creado con exito.
+          schema:
+            $ref: '#/definitions/forms.CatForm'
+      summary: Crea un gato
+      tags:
+      - Gato
+  /user/:
+    get:
+      consumes:
+      - application/json
+      description: Permite obtener todos los usuarios del sistema
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Usuario creado con exito.
+          schema:
+            items:
+              $ref: '#/definitions/models.User'
+            type: array
+      summary: Obtiene todos los usuario
+      tags:
+      - Usuario
+    post:
+      consumes:
+      - application/json
+      description: Permite crear un usuario en el sistema
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Usuario creado con exito.
+          schema:
+            $ref: '#/definitions/forms.UserForm'
+      summary: Crea un usuario
+      tags:
+      - Usuario
+  /user/postgres:
+    get:
+      consumes:
+      - application/json
+      description: Permite obtener todos los usuarios del sistema
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Usuario creado con exito.
+      summary: Obtiene todos los usuario
+      tags:
+      - Usuario
+    post:
+      consumes:
+      - application/json
+      description: Permite crear un usuario en el sistema
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Usuario creado con exito.
+          schema:
+            $ref: '#/definitions/forms.UserFormPostgres'
+      summary: Crea un usuario
+      tags:
+      - Usuario
+swagger: "2.0"

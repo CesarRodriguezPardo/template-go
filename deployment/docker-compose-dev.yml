@@ -1,0 +1,59 @@
+services:
+  postgres-db:
+      image: postgres:latest
+      ports:
+        - "5432:5432"
+      volumes:
+        - postgres-db:/var/lib/postgresql/data
+      environment:
+      - POSTGRES_USER=${DB_USER_POSTGRES}
+      - POSTGRES_PASSWORD=${DB_PASS_POSTGRES}
+      - POSTGRES_DB=${DB_NAME_POSTGRES}
+      networks:
+        - template-network
+      healthcheck:
+          test: ["CMD-SHELL", "pg_isready -U ${DB_USER_POSTGRES} -d ${DB_NAME_POSTGRES}"]
+          interval: 10s
+          timeout: 10s
+          retries: 5
+  mongo-db:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-db:/data/db
+    networks:
+      - template-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh mongo-db:${DB_PORT_MONGO}/${DB_NAME_MONGO} --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+  backend:
+    build:
+      context: ..
+      dockerfile: Dockerfile.dev
+    depends_on:
+      mongo-db:
+        condition: service_healthy
+      postgres-db:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ..:/app
+      - storage:/app/storage
+    networks:
+      - template-network
+
+volumes:
+  mongo-db:
+  postgres-db:
+  storage:
+
+networks:
+  template-network:
+    driver:
+      bridge

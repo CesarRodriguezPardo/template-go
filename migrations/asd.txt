@@ -1,0 +1,19 @@
+# postgres
+
+migrate create -ext sql -dir dir -seq name
+
+path postgres  backend/migrations/postgres
+
+generic uri: postgres://user:pass@hpst:port/database-name?sslmode=disable
+
+uri: postgres://postgres:pass_postges@localhost:5432/template?sslmode=disable
+
+crear las tablas 
+migrate -database 'postgres://postgres:pass_postges@localhost:5432/nombre_db?sslmode=disable' -path /Users/maxito/Desktop/Codes/Citiaps/golang-backend-template/backend/migrations/postgres up 
+
+eliminar las tablas
+migrate -database 'postgres://postgres:pass_postges@localhost:5432/nombre_db?sslmode=disable' -path /Users/maxito/Desktop/Codes/Citiaps/golang-backend-template/backend/migrations/postgres down
+
+# mongo
+
+path mongo       backend/migrations/mongo
