@@ -8,11 +8,9 @@ const (
 )
 
 var (
-	DB         *database.MongoConnection
 	DBPostgres *database.PostgresConnection
 )
 
 func InitConnections() {
-	DB = database.NewMongoConnection()
 	DBPostgres = database.NewPostgresConnection()
 }

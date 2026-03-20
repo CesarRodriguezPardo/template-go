@@ -6,19 +6,12 @@ import (
 )
 
 var (
-	// mongo
-	catRepo  *repositories.CatRepository
-	userRepo *repositories.UserRepository
-
 	// postgres
 	catRepoPostgres  *repositories.CatRepositoryPostgres
 	userRepoPostgres *repositories.UserRepositoryPostgres
 )
 
 func InitRepositories() {
-	catRepo = repositories.NewCatRepository()
-	userRepo = repositories.NewUserRepository()
-
 	catRepoPostgres = repositories.NewCatRepositoryPostgres()
 	userRepoPostgres = repositories.NewUserRepositoryPostgres()
 }

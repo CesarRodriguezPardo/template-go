@@ -23,9 +23,7 @@ type Config struct {
 
 type DatabaseConfig struct {
 	UsePostgres bool
-	UseMongo    bool
 	Postgres    PostgresConfig
-	Mongo       MongoConfig
 }
 
 type PostgresConfig struct {
@@ -35,16 +33,6 @@ type PostgresConfig struct {
 	Port string
 	Name string
 	URI  string
-}
-
-type MongoConfig struct {
-	User       string
-	Pass       string
-	Host       string
-	Port       string
-	Name       string
-	URI        string
-	Collection string
 }
 
 type ServerConfig struct {
@@ -83,27 +71,19 @@ var Cfg *Config
 func LoadConfig() {
 	Cfg = &Config{}
 
-	// Gin config
 	Cfg.Server.Mode = utils.GetEnvWithDefault("GIN_MODE", "debug")
 	gin.SetMode(Cfg.Server.Mode)
 
-	// port
 	Cfg.Server.Port = utils.GetEnvWithDefault("PORT", "8080")
 
-	//jwt config
 	loadJWTConfig(&Cfg.JWT)
 
-	// db config
 	loadPostgresConfig(&Cfg.Database)
-	loadMongoConfig(&Cfg.Database)
 
-	// mailer config
 	loadMailerConfig(&Cfg.Mailer)
 
-	// logger config
 	loadLoggerConfig(&Cfg.Logger)
 
-	// cors config
 	loadCorsConfig(&Cfg.Cors)
 
 	// que al menos una de las 2 esten configuradas, sino no sirve
@@ -132,25 +112,6 @@ func loadPostgresConfig(dbConfig *DatabaseConfig) {
 	}
 }
 
-func loadMongoConfig(dbConfig *DatabaseConfig) {
-	user := os.Getenv("DB_USER_MONGO")
-	pass := os.Getenv("DB_PASS_MONGO")
-	host := os.Getenv("DB_HOST_MONGO")
-	port := os.Getenv("DB_PORT_MONGO")
-	name := os.Getenv("DB_NAME_MONGO")
-
-	if user != "" && pass != "" && host != "" && port != "" && name != "" {
-		dbConfig.UseMongo = true
-		dbConfig.Mongo = MongoConfig{
-			User: user,
-			Pass: pass,
-			Host: host,
-			Port: port,
-			Name: name,
-			URI:  fmt.Sprintf("mongodb://%s:%s/%s", host, port, name),
-		}
-	}
-}
 
 // por default implementa un jwt con algoritmo de firma simetrico y una clave default.
 func loadJWTConfig(jwtConfig *JWTConfig) {

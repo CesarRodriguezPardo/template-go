@@ -4,22 +4,9 @@ import (
 	"time"
 
 	"github.com/lib/pq"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 	"gorm.io/gorm"
 )
 
-// mongo
-type User struct {
-	ID         primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
-	Name       string             `json:"name" bson:"name"`
-	MiddleName string             `json:"middlename" bson:"middlename"`
-	Email      string             `json:"email" bson:"email"`
-	Password   string             `json:"password" bson:"password"`
-	Phone      string             `json:"phone" bson:"phone"`
-	Roles      []Rol              `json:"roles" bson:"roles"`
-	ActiveRol  Rol                `json:"active_rol" bson:"active_rol"`
-	CreatedAt  time.Time          `json:"created_at" bson:"created_at"`
-}
 
 // Rol es una estructura con 2 potenciales valores, ADMIN o REGULAR.
 

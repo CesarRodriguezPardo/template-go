@@ -13,7 +13,6 @@ import (
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	"github.com/lib/pq"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserClaims struct {
