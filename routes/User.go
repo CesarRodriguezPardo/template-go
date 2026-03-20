@@ -11,10 +11,6 @@ import (
 func InitUserRoutes(r *gin.RouterGroup) {
 	userGroup := r.Group("/user")
 	{
-		// mongo
-		userGroup.POST("/", controllers.CreateUserController)
-		userGroup.GET("/", middleware.SetRoles(models.ALL), middleware.LoadJWTAuth().MiddlewareFunc(), controllers.GetAllUsersController)
-
 		// postgres
 		userGroup.POST("/postgres", controllers.CreateUserControllerPostgres)
 		userGroup.GET("/postgres", middleware.SetRoles(models.ALL), middleware.LoadJWTAuth().MiddlewareFunc(), controllers.GetAllUsersControllerPostgres)

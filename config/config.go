@@ -87,8 +87,8 @@ func LoadConfig() {
 	loadCorsConfig(&Cfg.Cors)
 
 	// que al menos una de las 2 esten configuradas, sino no sirve
-	if !Cfg.Database.UsePostgres && !Cfg.Database.UseMongo {
-		log.Fatalf("CONFIG DATABASE: Al menos una base de datos (postgres o mongo) debe estar configurada.")
+	if !Cfg.Database.UsePostgres {
+		log.Fatalf("CONFIG DATABASE: Al menos una base de datos (postgres) debe estar configurada.")
 	}
 }
 
@@ -111,7 +111,6 @@ func loadPostgresConfig(dbConfig *DatabaseConfig) {
 		}
 	}
 }
-
 
 // por default implementa un jwt con algoritmo de firma simetrico y una clave default.
 func loadJWTConfig(jwtConfig *JWTConfig) {

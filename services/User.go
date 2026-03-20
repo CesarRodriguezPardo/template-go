@@ -5,12 +5,7 @@ import (
 	"citiaps/golang-backend-template/utils"
 	"errors"
 	"fmt"
-	"time"
-
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
 
 // postgres
 // se deberian hacer las validaciones respectivas

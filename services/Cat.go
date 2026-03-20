@@ -4,10 +4,7 @@ import (
 	"citiaps/golang-backend-template/models"
 	"errors"
 	"fmt"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
-
 
 // postgres
 
