@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"citiaps/golang-backend-template/forms"
-	"citiaps/golang-backend-template/mailer"
 	"citiaps/golang-backend-template/models"
 	"citiaps/golang-backend-template/services"
 	"citiaps/golang-backend-template/utils"

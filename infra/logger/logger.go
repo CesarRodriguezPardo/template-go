@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"CesarRodriguezPardo/template-go/config"
 	"os"
 	"time"
 
@@ -23,7 +24,13 @@ const (
 var logger *zap.Logger
 var santiago *time.Location
 
-func InitLogger(filepath string, filename string, level zapcore.Level, timeZone string) {
+func InitLogger() {
+
+	filepath := config.Cfg.Logger.Filepath
+	filename := config.Cfg.Logger.Filename
+	logLevel := config.Cfg.Logger.Level
+	timeZone := config.Cfg.Logger.Tz
+
 	logFilePath := filepath + filename + ".log"
 
 	consoleWriter := zapcore.AddSync(os.Stdout)
@@ -56,12 +63,10 @@ func InitLogger(filepath string, filename string, level zapcore.Level, timeZone 
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
 
-	levelEnabler := level
-
 	syncer := zapcore.NewMultiWriteSyncer(consoleWriter, fileWriter)
 	encoder := zapcore.NewConsoleEncoder(*encoderConfig)
 
-	core := zapcore.NewCore(encoder, syncer, levelEnabler)
+	core := zapcore.NewCore(encoder, syncer, logLevel)
 
 	logger = zap.New(core)
 

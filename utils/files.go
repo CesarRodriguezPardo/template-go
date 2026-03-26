@@ -8,7 +8,7 @@ import (
 )
 
 func SaveFile(file multipart.File, filename string) error {
-	path := GetEnvWithDefault("STORAGE_PATH", "app/storage")
+	path := GetEnvOrDefault("STORAGE_PATH", "app/storage")
 
 	filepath := path + "/" + filename
 

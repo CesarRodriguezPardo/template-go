@@ -1,14 +1,9 @@
 package config
 
 import (
-	"citiaps/golang-backend-template/utils"
-	"errors"
-	"fmt"
 	"log"
 	"os"
-	"slices"
 
-	"github.com/gin-gonic/gin"
 	"go.uber.org/zap/zapcore"
 )
 
@@ -22,17 +17,11 @@ type Config struct {
 }
 
 type DatabaseConfig struct {
-	UsePostgres bool
-	Postgres    PostgresConfig
-}
-
-type PostgresConfig struct {
 	User string
 	Pass string
 	Host string
 	Port string
 	Name string
-	URI  string
 }
 
 type ServerConfig struct {
@@ -41,11 +30,8 @@ type ServerConfig struct {
 }
 
 type JWTConfig struct {
-	FlagAlgType bool // true simetrico - falso asimetrico
-	SigningAlg  string
-	Key         string
-	PrivKeyPath string
-	PubKeyPath  string
+	SigningAlg string
+	Key        string
 }
 
 type MailerConfig struct {
@@ -63,127 +49,88 @@ type LoggerConfig struct {
 }
 
 type CorsConfig struct {
-	CorsUrl string
+	AllowedCors string
 }
 
 var Cfg *Config
 
 func LoadConfig() {
 	Cfg = &Config{}
-
-	Cfg.Server.Mode = utils.GetEnvWithDefault("GIN_MODE", "debug")
-	gin.SetMode(Cfg.Server.Mode)
-
-	Cfg.Server.Port = utils.GetEnvWithDefault("PORT", "8080")
-
+	loadServerConfig(&Cfg.Server)
 	loadJWTConfig(&Cfg.JWT)
-
-	loadPostgresConfig(&Cfg.Database)
-
+	loadDatabaseConfig(&Cfg.Database)
 	loadMailerConfig(&Cfg.Mailer)
-
 	loadLoggerConfig(&Cfg.Logger)
-
 	loadCorsConfig(&Cfg.Cors)
-
-	// que al menos una de las 2 esten configuradas, sino no sirve
-	if !Cfg.Database.UsePostgres {
-		log.Fatalf("CONFIG DATABASE: Al menos una base de datos (postgres) debe estar configurada.")
-	}
 }
 
-func loadPostgresConfig(dbConfig *DatabaseConfig) {
-	user := os.Getenv("DB_USER_POSTGRES")
-	pass := os.Getenv("DB_PASS_POSTGRES")
-	host := os.Getenv("DB_HOST_POSTGRES")
-	port := os.Getenv("DB_PORT_POSTGRES")
-	name := os.Getenv("DB_NAME_POSTGRES")
+func loadServerConfig(serverConfig *ServerConfig) {
+	serverConfig.Mode = GetEnvOrDefault("GIN_MODE", "debug")
+	serverConfig.Port = GetEnvOrDefault("PORT", "8000")
 
-	if user != "" && pass != "" && host != "" && port != "" && name != "" {
-		dbConfig.UsePostgres = true
-		dbConfig.Postgres = PostgresConfig{
-			User: user,
-			Pass: pass,
-			Host: host,
-			Port: port,
-			Name: name,
-			URI:  fmt.Sprintf("postgres://%s:%s@%s:%s/%s", user, pass, host, port, name),
-		}
-	}
+	log.Println("Server: Configuration done.")
 }
 
-// por default implementa un jwt con algoritmo de firma simetrico y una clave default.
+func loadDatabaseConfig(dbConfig *DatabaseConfig) {
+	databaseVars := []string{"DB_USER_POSTGRES", "DB_PASS_POSTGRES", "DB_HOST_POSTGRES", "DB_PORT_POSTGRES", "DB_NAME_POSTGRES"}
+
+	CheckMissingEnv(databaseVars)
+
+	dbConfig.User = os.Getenv("DB_USER_POSTGRES")
+	dbConfig.Pass = os.Getenv("DB_PASS_POSTGRES")
+	dbConfig.Host = os.Getenv("DB_HOST_POSTGRES")
+	dbConfig.Port = os.Getenv("DB_PORT_POSTGRES")
+	dbConfig.Name = os.Getenv("DB_NAME_POSTGRES")
+
+	log.Println("Database: Configuration done.")
+}
+
 func loadJWTConfig(jwtConfig *JWTConfig) {
-	jwtAlgorithm := utils.GetEnvWithDefault("SIGNING_ALG", "HS256")
-	jwtConfig.SigningAlg = jwtAlgorithm
+	jwtVars := []string{"JWT_KEY"}
+	CheckMissingEnv(jwtVars)
 
-	// caso es simetrico
-	symmetricAlgs := []string{"HS256", "HS384", "HS52"}
-	if slices.Contains(symmetricAlgs, jwtAlgorithm) {
-		jwtConfig.Key = utils.GetEnvWithDefault("JWT_KEY", "clave_super_privada")
-		jwtConfig.FlagAlgType = true
+	jwtKey := os.Getenv("JWT_KEY")
 
-		log.Println("CONFIG JWT: Algoritmo simetrico detectado y seteado en config.")
-	}
+	jwtConfig.Key = jwtKey
+	jwtConfig.SigningAlg = "HS256"
 
-	// caso es asimetrico
-	asymmetricAlgs := []string{"RS256"} // por añadir mas?
-	if slices.Contains(asymmetricAlgs, jwtAlgorithm) {
-
-		privKeyPath := utils.GetEnvWithDefault("PRIVATE_KEY_PATH", "/app/keys/priv.pem")
-		pubkeyPath := utils.GetEnvWithDefault("PUBLIC_KEY_PATH", "/app/keys/pub.pem")
-
-		if !utils.FileExists(privKeyPath) && !utils.FileExists(pubkeyPath) {
-			log.Println("CONFIG JWT: Ambas llaves, privada y publica, deben existir.", errors.New("No existen las llaves."))
-		}
-
-		jwtConfig.PrivKeyPath = privKeyPath
-		jwtConfig.PubKeyPath = pubkeyPath
-		jwtConfig.FlagAlgType = false
-
-		log.Println("CONFIG JWT: Algoritmo asimetrico detectado y seteado en config.")
-	}
+	log.Println("JWT: Configuration done.")
 }
 
 func loadMailerConfig(mailerConfig *MailerConfig) {
 	mailerVars := []string{"EMAIL_DIR", "EMAIL_PASS", "EMAIL_HOST", "EMAIL_PORT"}
-	missing := ""
 
-	for _, v := range mailerVars {
-		_, set := os.LookupEnv(v)
-		if !set {
-			missing = missing + v
-		}
-	}
-
-	// por ahora solamente se dejaran como variables criticas, puesto que no he preguntado si se pueden dejar como default
-	if len(missing) != 0 {
-		log.Fatal("CONFIG: Variables criticas no definidas: "+missing, errors.New("Variables faltantes"))
-	}
+	CheckMissingEnv(mailerVars)
 
 	mailerConfig.Dir = os.Getenv("EMAIL_DIR")
 	mailerConfig.Pass = os.Getenv("EMAIL_PASS")
 	mailerConfig.Host = os.Getenv("EMAIL_HOST")
 	mailerConfig.Port = os.Getenv("EMAIL_PORT")
+
+	log.Println("Mailer: Configuration done.")
 }
 
 func loadLoggerConfig(loggerConfig *LoggerConfig) {
-	loggerConfig.Filepath = utils.GetEnvWithDefault("FILEPATH", "/app/logs/")
-	loggerConfig.Filename = utils.GetEnvWithDefault("FILENAME", "template-logs")
+	loggerConfig.Filepath = GetEnvOrDefault("FILEPATH", "/app/logs/")
+	loggerConfig.Filename = GetEnvOrDefault("FILENAME", "template-logs")
 
-	loggerConfig.Tz = utils.GetEnvWithDefault("TZ", "America/Santiago")
+	loggerConfig.Tz = GetEnvOrDefault("TZ", "America/Santiago")
 
 	if Cfg.Server.Mode == "debug" {
 		loggerConfig.Level = zapcore.DebugLevel
+	} else {
+		loggerConfig.Level = zapcore.InfoLevel
 	}
-	loggerConfig.Level = zapcore.InfoLevel
+
+	log.Println("Logger: Configuration done.")
 }
 
 func loadCorsConfig(corsConfig *CorsConfig) {
 	cors, set := os.LookupEnv("CORS_URLS")
 	if !set {
-		log.Fatal("CONFIG: CORS no definidos.")
+		log.Fatal("Missing cors variable.")
 	}
+	corsConfig.AllowedCors = cors
 
-	corsConfig.CorsUrl = cors
+	log.Println("Cors: Configuration done.")
 }
