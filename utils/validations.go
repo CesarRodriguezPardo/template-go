@@ -3,87 +3,88 @@ package utils
 import (
 	"CesarRodriguezPardo/template-go/internal/models"
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
-func ToLowerEmail(email string) string {
-	lowerEmail := strings.ToLower(email)
-	return lowerEmail
+// validar mail
+// validar telefono
+
+// insertar texto con solo primera mayuscula nombre y apellido
+
+// validar objeto completo user
+
+func isNumeric(s string) bool {
+	if _, err := strconv.Atoi(s); err != nil {
+		return false
+	}
+	return true
 }
 
-// validacion super simple, deberia mejorarse pero es un alcance a lo que se espera
-func GetValidatedMail(email string) (string, error) {
-	splittedMail := strings.Split(email, "@")
+func validateMail(email string) error {
 
-	if len(splittedMail) != 2 || email == "" {
-		return email, errors.New("Email debe seguir el formato example@usach.cl")
-	}
+	// to do validar que sea correo
 
-	if splittedMail[1] != "usach.cl" {
-		return email, errors.New("Email debe ser institucional Usach.")
-	}
-
-	return email, nil
+	return nil
 }
 
-func ValidatePhone(phone string) error {
-	intPhone, err := strconv.Atoi(phone)
-
-	if err != nil {
-		return errors.New("El número de teléfono debe ser numérico.")
+func validatePhone(phone string) error {
+	if len(phone) != 9 {
+		return errors.New("length invalid.")
 	}
 
-	// se asume formato 9 1234 5678
-	if len(phone) != 9 || intPhone < 0 {
-		return errors.New("El número de teléfono no tiene el formato correcto.")
+	if !isNumeric(phone) {
+		return errors.New("invalid.")
 	}
 
 	return nil
 }
 
-func ValidateUserObject(user *models.User) error {
-	phone := user.Phone
-	err := ValidatePhone(phone)
-	if err != nil {
-		return err
+func validateString(s string) error {
+	if len(s) > 15 || len(s) == 0 {
+		return errors.New("string length invalid.")
 	}
 
-	email := user.Email
-	_, err = GetValidatedMail(email)
-	if err != nil {
-		return err
-	}
-
-	if user.Name == "" {
-		return errors.New("El nombre del usuario no puede ser vacio.")
-	}
-	if user.MiddleName == "" {
-		return errors.New("El apellido del usuario no puede ser vacio.")
+	if isNumeric(s) {
+		return errors.New("string invalid")
 	}
 
 	return nil
 }
 
-func ValidateUserPostgresObject(user *models.User) error {
-	phone := user.Phone
-	err := ValidatePhone(phone)
-	if err != nil {
-		return err
+func capitalizateText(s string) string {
+	loweredString := strings.ToLower(s)
+	capitalizedString := cases.Title(language.Spanish).String(loweredString)
+
+	return capitalizedString
+}
+
+func GetValidatedUser(user *models.User) (*models.User, error) {
+	if err := validateMail(user.Email); err != nil {
+		return nil, fmt.Errorf("error validating mail: %w", err)
 	}
 
-	email := user.Email
-	email, err = GetValidatedMail(email)
-	if err != nil {
-		return err
+	if err := validatePhone(user.Email); err != nil {
+		return nil, fmt.Errorf("error validating phone number: %w", err)
 	}
 
-	if user.Name == "" {
-		return errors.New("El nombre del usuario no puede ser vacio.")
-	}
-	if user.MiddleName == "" {
-		return errors.New("El apellido del usuario no puede ser vacio.")
+	if err := validateString(user.Name); err != nil {
+		return nil, fmt.Errorf("error validating name: %w", err)
 	}
 
-	return nil
+	if err := validateString(user.MiddleName); err != nil {
+		return nil, fmt.Errorf("error validating middle name: %w", err)
+	}
+
+	capitalizedName := capitalizateText(user.Name)
+	capitalizedMiddleName := capitalizateText(user.MiddleName)
+
+	user.Name = capitalizedName
+	user.MiddleName = capitalizedMiddleName
+
+	return user, nil
 }

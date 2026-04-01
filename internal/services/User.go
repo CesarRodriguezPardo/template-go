@@ -7,6 +7,29 @@ import (
 	"fmt"
 )
 
+func CreateUser(user *models.User) (*models.User, error){
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 func CreateUserServicePostgres(user *models.User) (*models.User, error) {
 	err := utils.ValidateUserPostgresObject(user)
 	if err != nil {
