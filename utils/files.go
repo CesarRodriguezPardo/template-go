@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"CesarRodriguezPardo/template-go/config"
 	"errors"
 	"io"
 	"mime/multipart"
@@ -8,7 +9,7 @@ import (
 )
 
 func SaveFile(file multipart.File, filename string) error {
-	path := GetEnvOrDefault("STORAGE_PATH", "app/storage")
+	path := config.GetEnvOrDefault("STORAGE_PATH", "app/storage")
 
 	filepath := path + "/" + filename
 

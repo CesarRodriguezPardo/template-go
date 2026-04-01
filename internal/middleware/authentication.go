@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"citiaps/golang-backend-template/config"
-	"citiaps/golang-backend-template/models"
-	"citiaps/golang-backend-template/services"
-	"citiaps/golang-backend-template/utils"
+	"CesarRodriguezPardo/template-go/config"
+	"CesarRodriguezPardo/template-go/internal/models"
+	"CesarRodriguezPardo/template-go/internal/services"
+	"CesarRodriguezPardo/template-go/utils"
 	"errors"
 	"net/http"
 	"slices"
@@ -12,19 +12,15 @@ import (
 
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
-	"github.com/lib/pq"
+	uuid "github.com/satori/go.uuid"
+
+	logger "CesarRodriguezPardo/template-go/infra/logger"
+	response "CesarRodriguezPardo/template-go/infra/response"
 )
 
 type UserClaims struct {
-	ID        primitive.ObjectID `json:"_id" bson:"_id,omitempty"`
-	Roles     []models.Rol       `json:"roles" bson:"roles"`
-	ActiveRol models.Rol         `json:"active_rol" bson:"active_rol"`
-}
-
-type UserClaimsPostgres struct {
-	ID        uint           `json:"_id" bson:"_id,omitempty"`
-	Roles     pq.StringArray `gorm:"type:text[]" json:"roles" bson:"roles"`
-	ActiveRol string         `json:"active_rol" bson:"active_rol"`
+	ID   uuid.UUID `json:"id""`
+	Role string    `json:"roles"`
 }
 
 // LoadJWTAuth: funcion que implementa un JWT.
@@ -82,68 +78,39 @@ func LoadJWTAuth() *jwt.GinJWTMiddleware {
 
 	signingAlg := config.Cfg.JWT.SigningAlg
 
-	if config.Cfg.JWT.FlagAlgType {
-		key := config.Cfg.JWT.Key
-		authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
-			Realm:            "test zone",
-			Key:              []byte(key),
-			SigningAlgorithm: signingAlg,
-			Authenticator:    AuthenticatorFunc,
-			Authorizator:     AuthorizatorFunc,
-			PayloadFunc:      PayloadFunc,
-			Unauthorized:     UnauthorizedHandlerFunc,
-			LoginResponse:    LoginResponse,
-			IdentityHandler:  IdentityHandlerFunc,
-			TokenLookup:      tokenLookup,
-			TokenHeadName:    "Bearer",
-			TimeFunc:         time.Now,
-			SendCookie:       true,
-			CookieName:       "token",
-			CookieSameSite:   http.SameSiteLaxMode,
-		})
-		if err != nil {
-			utils.Fatal("Error en el middleware", err)
-		}
-
-		return authMiddleware
-	}
-
-	pubKey := config.Cfg.JWT.PubKeyPath
-	privKey := config.Cfg.JWT.PrivKeyPath
-
+	key := config.Cfg.JWT.Key
 	authMiddleware, err := jwt.New(&jwt.GinJWTMiddleware{
 		Realm:            "test zone",
+		Key:              []byte(key),
 		SigningAlgorithm: signingAlg,
 		Authenticator:    AuthenticatorFunc,
 		Authorizator:     AuthorizatorFunc,
 		PayloadFunc:      PayloadFunc,
 		Unauthorized:     UnauthorizedHandlerFunc,
 		LoginResponse:    LoginResponse,
-		LogoutResponse:   LogoutResponse,
 		IdentityHandler:  IdentityHandlerFunc,
 		TokenLookup:      tokenLookup,
 		TokenHeadName:    "Bearer",
 		TimeFunc:         time.Now,
-		PrivKeyFile:      privKey,
-		PubKeyFile:       pubKey,
 		SendCookie:       true,
 		CookieName:       "token",
 		CookieSameSite:   http.SameSiteLaxMode,
 	})
 	if err != nil {
-		utils.Fatal("Error en el middleware", err)
+		logger.Fatal("Error en el middleware", err)
 	}
+
 	return authMiddleware
 }
 
 // SetRoles : funcion que define los roles que pueden realizar las peticiones.
 // Se implementa sobre las rutas para definir que rol puede ocupar el servicio
-func SetRoles(roles ...models.Rol) gin.HandlerFunc {
+func SetRoles(roles ...models.Role) gin.HandlerFunc {
 	if slices.Contains(roles, models.ALL) {
-		roles = models.ALL_ROLES
+		roles = models.ALL_ROLE
 	}
 	if slices.Contains(roles, models.ADMIN) {
-		roles = append(roles, models.ADMIN_ROLES...)
+		roles = append(roles, models.ADMIN_ROLE...)
 	}
 
 	return func(c *gin.Context) {
@@ -156,13 +123,13 @@ func SetRoles(roles ...models.Rol) gin.HandlerFunc {
 func AuthorizatorFunc(data interface{}, c *gin.Context) bool {
 	userData := data.(map[string]interface{})
 
-	activeRole := models.Rol(userData["active_rol"].(string))
+	activeRole := models.Role(userData["active_rol"].(string))
 
 	roles, exists := c.Get("roles")
 	if !exists {
 		return true
 	}
-	for _, r := range roles.([]models.Rol) {
+	for _, r := range roles.([]models.Role) {
 		if activeRole == r {
 			return true
 		}
@@ -202,12 +169,11 @@ func AuthenticatorFunc(c *gin.Context) (interface{}, error) {
 	}
 
 	userClaims := UserClaims{
-		ID:        user.ID,
-		Roles:     user.Roles,
-		ActiveRol: user.ActiveRol,
+		ID:   user.ID,
+		Role: user.Role,
 	}
 
-	utils.Info("Login exitoso para usuario " + loginUserEmail + " desde ip: " + c.ClientIP())
+	logger.Info("Login exitoso para usuario " + loginUserEmail + " desde ip: " + c.ClientIP())
 
 	c.Set("user", userClaims)
 	return userClaims, nil
@@ -245,8 +211,8 @@ func UnauthorizedHandlerFunc(c *gin.Context, code int, message string) {
 
 	userClaims := IdentityHandlerFunc(c)
 	if userClaims == nil {
-		utils.Info("Intento de petición no autenticada desde ip: " + c.ClientIP())
-		utils.JsonResponse(c, 403, message, nil)
+		logger.Info("Intento de petición no autenticada desde ip: " + c.ClientIP())
+		response.JsonResponse(c, 403, message, nil)
 		return
 	}
 
@@ -255,18 +221,18 @@ func UnauthorizedHandlerFunc(c *gin.Context, code int, message string) {
 	userMap, _ := userClaims.(map[string]interface{})
 	userIDStr, _ := userMap["_id"].(string)
 
-	utils.Info("Intento de petición: " + c.Request.URL.Path + ". No autorizada por usuario con id: " + userIDStr + " e ip: " + c.ClientIP())
-	utils.JsonResponse(c, code, message, nil)
+	logger.Info("Intento de petición: " + c.Request.URL.Path + ". No autorizada por usuario con id: " + userIDStr + " e ip: " + c.ClientIP())
+	response.JsonResponse(c, code, message, nil)
 }
 
 // LoginResponse: funcion que setea respuestas del jwt
 func LoginResponse(c *gin.Context, code int, token string, expire time.Time) {
 	user, ok := c.Get("user")
 	if !ok {
-		utils.JWTResponse(c, code, "Login fallido.", token, expire, nil)
+		response.JWTResponse(c, code, "Login fallido.", token, expire, nil)
 		return
 	}
-	utils.JWTResponse(c, code, "Login exitoso.", token, expire, user)
+	response.JWTResponse(c, code, "Login exitoso.", token, expire, user)
 }
 
 // LogoutResponse: funcion que setea respuestas del jwt

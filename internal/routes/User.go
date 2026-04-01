@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"citiaps/golang-backend-template/controllers"
-	"citiaps/golang-backend-template/middleware"
-	"citiaps/golang-backend-template/models"
+	"CesarRodriguezPardo/template-go/internal/controllers"
+	"CesarRodriguezPardo/template-go/internal/middleware"
+	"CesarRodriguezPardo/template-go/internal/models"
 
 	"github.com/gin-gonic/gin"
 )

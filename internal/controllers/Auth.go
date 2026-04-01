@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"citiaps/golang-backend-template/middleware"
+	"CesarRodriguezPardo/template-go/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )

@@ -1,6 +1,10 @@
 package repositories
 
-import "citiaps/golang-backend-template/config/database"
+import (
+	"CesarRodriguezPardo/template-go/infra/database"
+	"context"
+	"fmt"
+)
 
 const (
 	CollectionCats  = "Cats"
@@ -8,9 +12,17 @@ const (
 )
 
 var (
-	DBPostgres *database.PostgresConnection
+	DB *database.Postgres
 )
 
-func InitConnections() {
-	DBPostgres = database.NewPostgresConnection()
+func InitConnections() error {
+	var err error
+
+	DB, err = database.NewPG(context.Background())
+
+	if err != nil {
+		return fmt.Errorf("could not connect to PG: %w", err)
+	}
+
+	return nil
 }

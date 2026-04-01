@@ -4,28 +4,24 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// constantes relativas al costo computacional del hasheo.
-
 const (
 	MinCost  = bcrypt.MinCost
-	TestCost = (MinCost + MaxCost) / 2 // unicamente para testear velocidad
+	TestCost = (MinCost + MaxCost) / 2
 	MaxCost  = bcrypt.MaxCost
 )
 
-// GeneratePassword: funcion para generar password hasheada.
-func GeneratePassword(password string) string {
+func GenerateHashedPassword(password string) (string, error) {
 	slicePassword := []byte(password)
 
 	hash, err := bcrypt.GenerateFromPassword(slicePassword, MinCost)
 
 	if err != nil {
-		logger.Fatal("No se pudo generar el hash")
+		return "", err
 	}
 
-	return string(hash)
+	return string(hash), nil
 }
 
-// CompareHashToPassword: funcion para verificar si una password es la que esta hasheada.
 func CompareHashToPassword(password string, hashedPassword string) bool {
 	slicePassword := []byte(password)
 	sliceHashedPassword := []byte(hashedPassword)

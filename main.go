@@ -2,14 +2,16 @@ package main
 
 import (
 	"CesarRodriguezPardo/template-go/config"
-	"citiaps/golang-backend-template/docs"
-	"citiaps/golang-backend-template/mailer"
-	"citiaps/golang-backend-template/middleware"
-	"citiaps/golang-backend-template/repositories"
-	"citiaps/golang-backend-template/routes"
-	"citiaps/golang-backend-template/services"
-	"citiaps/golang-backend-template/utils"
+	"CesarRodriguezPardo/template-go/docs"
+	"CesarRodriguezPardo/template-go/internal/mailer"
+	"CesarRodriguezPardo/template-go/internal/middleware"
+	"CesarRodriguezPardo/template-go/internal/repositories"
+	"CesarRodriguezPardo/template-go/internal/routes"
+	"CesarRodriguezPardo/template-go/internal/services"
 	"fmt"
+	"log"
+
+	logger "CesarRodriguezPardo/template-go/infra/logger"
 
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
@@ -18,7 +20,6 @@ import (
 
 func initApp() *gin.Engine {
 	app := gin.Default()
-
 	return app
 }
 
@@ -44,31 +45,27 @@ func setupApp() error {
 	routes.InitRoutes(app)
 
 	port := config.Cfg.Server.Port
-	err := app.Run(":" + port)
-
-	if err != nil {
-		return fmt.Errorf("Could not initialize app: %w.", err)
+	if err := app.Run(":" + port); err != nil {
+		return fmt.Errorf("Could not initialize app: %w", err)
 	}
 
 	return nil
 }
 
 func main() {
-	config.LoadConfig()
+	if err := config.LoadConfig(); err != nil {
+		log.Fatal(err)
+	}
 
-	utils.InitLogger()
+	logger.InitLogger()
 
 	repositories.InitConnections()
 
 	services.InitRepositories()
 
-	services.InitIndexes()
-
 	mailer.InitMailer()
 
-	err := setupApp()
-
-	if err != nil {
-		utils.Fatal(err)
+	if err := setupApp(); err != nil {
+		logger.Fatal("Moew", err)
 	}
 }

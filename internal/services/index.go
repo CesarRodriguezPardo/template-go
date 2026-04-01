@@ -1,30 +1,14 @@
 package services
 
 import (
-	"citiaps/golang-backend-template/repositories"
-	"errors"
+	"CesarRodriguezPardo/template-go/infra/database"
+	"CesarRodriguezPardo/template-go/internal/repositories"
 )
 
 var (
-	// postgres
-	catRepoPostgres  *repositories.CatRepositoryPostgres
-	userRepoPostgres *repositories.UserRepositoryPostgres
+	userRepo *repositories.UserRepository
 )
 
-func InitRepositories() {
-	catRepoPostgres = repositories.NewCatRepositoryPostgres()
-	userRepoPostgres = repositories.NewUserRepositoryPostgres()
-}
-
-func InitIndexes() error {
-	err := catRepo.CreateIndexes()
-	if err != nil {
-		return errors.New("error al inicializar los indices de los gatitos: " + err.Error())
-	}
-
-	err = userRepo.CreateIndexes()
-	if err != nil {
-		return errors.New("error al inicializar los índices de los usuarios: " + err.Error())
-	}
-	return nil
+func InitRepositories(db *database.Postgres) {
+	userRepo = repositories.NewUserRepository(db)
 }

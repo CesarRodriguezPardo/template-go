@@ -1,8 +1,7 @@
 package config
 
 import (
-	"errors"
-	"log"
+	"fmt"
 	"os"
 	"strings"
 )
@@ -15,7 +14,7 @@ func GetEnvOrDefault(key, defaultValue string) string {
 	return defaultValue
 }
 
-func CheckMissingEnv(listedVars []string) {
+func CheckMissingEnv(listedVars []string) error {
 	missing := []string{}
 
 	for _, v := range listedVars {
@@ -26,6 +25,8 @@ func CheckMissingEnv(listedVars []string) {
 	}
 
 	if len(missing) != 0 {
-		log.Fatal("Missing variables: "+strings.Join(missing, ", "), errors.New("Missing variables"))
+		return fmt.Errorf("missing variables: " + strings.Join(missing, ", "))
 	}
+
+	return nil
 }

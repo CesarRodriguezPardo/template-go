@@ -3,21 +3,20 @@ package models
 import (
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
-	"github.com/lib/pq"
+	uuid "github.com/satori/go.uuid"
 )
 
 type User struct {
-	Id         pgtype.UUID `json:"id"`
-	Name       string `json:"name"`
-	MiddleName string `json:"middlename"`
-	Email      string `json:"email"`
-	Phone      string `json:"phone"`
+	ID         uuid.UUID `json:"id"         db:"id"`
+	Name       string    `json:"name"       db:"name"`
+	MiddleName string    `json:"middlename" db:"middle_name"`
+	Email      string    `json:"email"      db:"email"`
+	Phone      string    `json:"phone"      db:"phone"`
 
-	Password string `json:"password"`
+	Password string `json:"password" db:"password"`
 
-	Role pq.StringArray `gorm:"type:text[]" json:"roles"`
+	Role string `json:"role" db:"role"`
 
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	CreatedAt time.Time `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time `json:"updated_at" db:"updated_at"`
 }

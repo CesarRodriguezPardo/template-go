@@ -1,16 +1,13 @@
 package services
 
 import (
-	"citiaps/golang-backend-template/models"
-	"citiaps/golang-backend-template/utils"
+	"CesarRodriguezPardo/template-go/internal/models"
+	"CesarRodriguezPardo/template-go/utils"
 	"errors"
 	"fmt"
 )
 
-// postgres
-// se deberian hacer las validaciones respectivas
-
-func CreateUserServicePostgres(user *models.UserPostgres) (*models.UserPostgres, error) {
+func CreateUserServicePostgres(user *models.User) (*models.User, error) {
 	err := utils.ValidateUserPostgresObject(user)
 	if err != nil {
 		return nil, err
@@ -22,7 +19,11 @@ func CreateUserServicePostgres(user *models.UserPostgres) (*models.UserPostgres,
 		return nil, errors.New("Ya existe usuario con el email.")
 	}
 
-	hashedPassword := utils.GeneratePassword(user.Password)
+	hashedPassword, err := utils.GenerateHashedPassword(user.Password)
+
+	if err != nil {
+		return nil, fmt.Errorf("Could not hash password: %w", err)
+	}
 
 	user.Password = hashedPassword
 
@@ -37,7 +38,7 @@ func CreateUserServicePostgres(user *models.UserPostgres) (*models.UserPostgres,
 	return user, nil
 }
 
-func GetAllUsersServicePostgres() ([]*models.UserPostgres, error) {
+func GetAllUsersServicePostgres() ([]*models.User, error) {
 	users, err := userRepoPostgres.GetAllPostgres()
 
 	if err != nil {
@@ -46,8 +47,8 @@ func GetAllUsersServicePostgres() ([]*models.UserPostgres, error) {
 	return users, nil
 }
 
-func GetUserByEmailPostgres(email string) (*models.UserPostgres, error) {
-	condition := models.UserPostgres{Email: email}
+func GetUserByEmailPostgres(email string) (*models.User, error) {
+	condition := models.User{Email: email}
 	user, err := userRepoPostgres.FindOnePostgres(condition)
 
 	if user == nil {

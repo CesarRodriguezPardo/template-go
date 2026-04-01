@@ -1,9 +1,9 @@
 package mailer
 
 import (
+	"CesarRodriguezPardo/template-go/config"
+	logger "CesarRodriguezPardo/template-go/infra/logger"
 	"bytes"
-	"citiaps/golang-backend-template/config"
-	"citiaps/golang-backend-template/utils"
 	"crypto/tls"
 	"fmt"
 	"html/template"
@@ -104,14 +104,14 @@ func (r *Request) SendMailSkipTLS(templateName string, items interface{}) error 
 	var puerto int
 	puerto, err = strconv.Atoi(port)
 	if err != nil {
-		utils.Error("No se pudo mandar el email: %s", err)
+		logger.Error("No se pudo mandar el email", err)
 		return err
 	}
 	d := mail.NewDialer(host, puerto, email, pass)
 	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
 
 	if err := d.DialAndSend(m); err != nil {
-		utils.Error("No se pudo mandar el email: %s", err)
+		logger.Error("No se pudo mandar el email", err)
 		return err
 	}
 

@@ -2,41 +2,51 @@ package database
 
 import (
 	"CesarRodriguezPardo/template-go/config"
-	"CesarRodriguezPardo/template-go/utils"
 	"context"
-	"errors"
 	"fmt"
 	"net/url"
-	"time"
+	"sync"
 
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Connection struct {
-	Connect *pgx.Conn
+type Postgres struct {
+	db *pgxpool.Pool
 }
 
-func NewPostgresConnection() *Connection {
-	ctx, cancel := context.WithTimeout(10 * time.Second)
-	defer cancel()
+var (
+	pgInstance *Postgres
+	pgOnce     sync.Once
+)
 
+var initErr error
+
+func NewPG(ctx context.Context) (*Postgres, error) {
 	uri := buildUri()
 
-	connCtx, cancel := context.WithTimeout(ctx, 10*time.Second)
-	defer cancel()
+	pgOnce.Do(func() {
+		db, err := pgxpool.New(ctx, uri)
+		if err != nil {
+			initErr = fmt.Errorf("pgxpool.New: %w", err)
+			return
+		}
 
-	conn, err := pgx.Connect(connCtx, uri)
+		pgInstance = &Postgres{db}
+	})
 
-	if err != nil {
-		utils.Fatal("Could not connect to Postgres.", errors.New("Could not connect to Postgres."))
-	}
-	defer conn.Close(ctx)
+	return pgInstance, initErr
+}
 
-	connection := &Connection{}
+func (pg *Postgres) Pool() *pgxpool.Pool {
+	return pg.db
+}
 
-	var ok error
+func (pg *Postgres) Ping(ctx context.Context) error {
+	return pg.db.Ping(ctx)
+}
 
-	return connection
+func (pg *Postgres) Close() {
+	pg.db.Close()
 }
 
 func buildUri() string {

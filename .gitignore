@@ -14,11 +14,9 @@ backend-template-buildvcs=false
 # aqui se ignora todo
 logs/*
 storage/*
-keys/*
 
 # y aqui se agrega solamente el .gitkeep, pudiendo asi, subir la carpeta
-!keys/.gitkeep
 !storage/.gitkeep
 !logs/.gitkeep
 
-backend/migrations/
+.DS_Store

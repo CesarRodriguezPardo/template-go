@@ -1,10 +1,12 @@
 package controllers
 
 import (
-	"citiaps/golang-backend-template/forms"
-	"citiaps/golang-backend-template/models"
-	"citiaps/golang-backend-template/services"
-	"citiaps/golang-backend-template/utils"
+	"CesarRodriguezPardo/template-go/internal/forms"
+	"CesarRodriguezPardo/template-go/internal/models"
+	"CesarRodriguezPardo/template-go/internal/services"
+
+	logger "CesarRodriguezPardo/template-go/infra/logger"
+	response "CesarRodriguezPardo/template-go/infra/response"
 
 	"github.com/gin-gonic/gin"
 )
@@ -25,35 +27,34 @@ const (
 // @Success 200 {object} forms.UserFormPostgres "Usuario creado con exito."
 // @Router /user/postgres [post]
 func CreateUserControllerPostgres(c *gin.Context) {
-	var newUserFormsPostgres *forms.UserFormPostgres
-	err := c.BindJSON(&newUserFormsPostgres)
+	var userForm *forms.UserForm
+	err := c.BindJSON(&userForm)
 
 	if err != nil {
-		utils.JsonResponse(c, 500, "Error en los datos del usuario.", newUserFormsPostgres)
+		response.JsonResponse(c, 500, "Error en los datos del usuario.", userForm)
 		return
 	}
 
-	newUser := &models.UserPostgres{
-		Name:       newUserFormsPostgres.Name,
-		MiddleName: newUserFormsPostgres.MiddleName,
-		Email:      newUserFormsPostgres.Email,
-		Password:   newUserFormsPostgres.Password,
-		Phone:      newUserFormsPostgres.Phone,
-		Roles:      newUserFormsPostgres.Roles,
-		ActiveRol:  newUserFormsPostgres.ActiveRol,
+	newUser := &models.User{
+		Name:       userForm.Name,
+		MiddleName: userForm.MiddleName,
+		Email:      userForm.Email,
+		Password:   userForm.Password,
+		Phone:      userForm.Phone,
+		Role:       userForm.Role,
 	}
 
 	returnedUser, err := services.CreateUserServicePostgres(newUser)
 	if err != nil {
 
-		utils.Info("Intento de creación de usuario erroneo desde: " + c.ClientIP())
+		logger.Info("Intento de creación de usuario erroneo desde: " + c.ClientIP())
 
-		utils.JsonResponse(c, 500, err.Error(), newUser)
+		response.JsonResponse(c, 500, err.Error(), newUser)
 		return
 	}
 
-	utils.Info("Creacion exitosa de usuario " + newUser.Email + " desde ip: " + c.ClientIP())
-	utils.JsonResponse(c, 201, "Usuario creado con exito.", returnedUser)
+	logger.Info("Creacion exitosa de usuario " + newUser.Email + " desde ip: " + c.ClientIP())
+	response.JsonResponse(c, 201, "Usuario creado con exito.", returnedUser)
 }
 
 // GetAllUsersControllerPostgres
@@ -68,12 +69,12 @@ func CreateUserControllerPostgres(c *gin.Context) {
 func GetAllUsersControllerPostgres(c *gin.Context) {
 	returnedUsers, err := services.GetAllUsersServicePostgres()
 	if err != nil {
-		utils.JsonResponse(c, 500, "Error al obtener todos los usuarios.", returnedUsers)
+		response.JsonResponse(c, 500, "Error al obtener todos los usuarios.", returnedUsers)
 		return
 	}
 	if returnedUsers == nil {
-		utils.JsonResponse(c, 200, "No se han encontrado usuarios.", returnedUsers)
+		response.JsonResponse(c, 200, "No se han encontrado usuarios.", returnedUsers)
 		return
 	}
-	utils.JsonResponse(c, 200, "Usuarios obtenidos con exito.", returnedUsers)
+	response.JsonResponse(c, 200, "Usuarios obtenidos con exito.", returnedUsers)
 }

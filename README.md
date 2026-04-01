@@ -3,6 +3,13 @@ Repositorio base para la creacion de un servicio REST en GO.
 
 # Old Docs
 
+se cambio de sqlc a pgx solamente y scany, no me gusto para nada sqlc y tendria q hacer mucho boilerplate xd.
+
+to do: 
+    agregar inicializacion de bd a main.go
+
+
+
 El REST tiene:
  * Implementaciones para Mongo y Postgres.
  * Uso de JWT (simetrico y asimetrico con detección automática) y acceso restringido a servicios con roles.

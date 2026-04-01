@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"citiaps/golang-backend-template/models"
+	"CesarRodriguezPardo/template-go/internal/models"
 	"errors"
 	"strconv"
 	"strings"
@@ -65,7 +65,7 @@ func ValidateUserObject(user *models.User) error {
 	return nil
 }
 
-func ValidateUserPostgresObject(user *models.UserPostgres) error {
+func ValidateUserPostgresObject(user *models.User) error {
 	phone := user.Phone
 	err := ValidatePhone(phone)
 	if err != nil {
