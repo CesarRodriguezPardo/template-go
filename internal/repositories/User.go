@@ -4,8 +4,10 @@ import (
 	"CesarRodriguezPardo/template-go/infra/database"
 	"CesarRodriguezPardo/template-go/internal/models"
 	"context"
+	"errors"
 	"fmt"
 
+	"github.com/jackc/pgx/v5"
 	uuid "github.com/satori/go.uuid"
 )
 
@@ -37,18 +39,37 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *models.User) (
 	return id, nil
 }
 
-func (repo *UserRepository) FindUserByEmail(ctx context.Context, email string) (uuid.UUID, error) {
+func (repo *UserRepository) GetIdByEmail(ctx context.Context, email string) (uuid.UUID, error) {
 	query := `
 		SELECT id FROM users
-		WHERE email := $1
+		WHERE email = $1
 	`
 	var id uuid.UUID
 	err := repo.DB.Pool().QueryRow(ctx, query, email).Scan(&id)
 	if err != nil {
-		return uuid.UUID{}, fmt.Errorf("UserRepository.findUserByEmail: %w", err)
+		if errors.Is(err, pgx.ErrNoRows) {
+			return uuid.Nil, nil
+		}
+		return uuid.Nil, fmt.Errorf("UserRepository.findUserByEmail: %w", err)
 	}
 
 	return id, nil
+}
+
+func (repo *UserRepository) GetAuthDataByEmail(ctx context.Context, email string) (*models.User, error) {
+	query := `
+		SELECT password, role FROM users
+		WHERE email = $1 
+	`
+	user := &models.User{}
+	err := repo.DB.Pool().QueryRow(ctx, query, email).
+		Scan(&user.Password, &user.Role)
+
+	if err != nil {
+		return nil, fmt.Errorf("credentials: %w", err)
+	}
+
+	return user, nil
 }
 
 func NewUserRepository(db *database.Postgres) *UserRepository {

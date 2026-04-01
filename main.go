@@ -3,14 +3,16 @@ package main
 import (
 	"CesarRodriguezPardo/template-go/config"
 	"CesarRodriguezPardo/template-go/docs"
-	"CesarRodriguezPardo/template-go/internal/mailer"
+	mailer "CesarRodriguezPardo/template-go/infra/mailer"
 	"CesarRodriguezPardo/template-go/internal/middleware"
 	"CesarRodriguezPardo/template-go/internal/repositories"
 	"CesarRodriguezPardo/template-go/internal/routes"
 	"CesarRodriguezPardo/template-go/internal/services"
+	"context"
 	"fmt"
 	"log"
 
+	"CesarRodriguezPardo/template-go/infra/database"
 	logger "CesarRodriguezPardo/template-go/infra/logger"
 
 	"github.com/gin-gonic/gin"
@@ -61,7 +63,14 @@ func main() {
 
 	repositories.InitConnections()
 
-	services.InitRepositories()
+	ctx := context.Background()
+	db, err := database.NewPG(ctx)
+
+	if err != nil {
+		logger.Fatal("meow", err)
+	}
+
+	services.InitRepositories(db)
 
 	mailer.InitMailer()
 

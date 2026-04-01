@@ -44,7 +44,7 @@ func CreateUserControllerPostgres(c *gin.Context) {
 		Role:       userForm.Role,
 	}
 
-	returnedUser, err := services.CreateUserServicePostgres(newUser)
+	returnedUser, err := services.CreateUser(c, newUser)
 	if err != nil {
 
 		logger.Info("Intento de creación de usuario erroneo desde: " + c.ClientIP())
@@ -56,6 +56,8 @@ func CreateUserControllerPostgres(c *gin.Context) {
 	logger.Info("Creacion exitosa de usuario " + newUser.Email + " desde ip: " + c.ClientIP())
 	response.JsonResponse(c, 201, "Usuario creado con exito.", returnedUser)
 }
+
+/*
 
 // GetAllUsersControllerPostgres
 // @Title GetAllUsersControllerPostgres
@@ -78,3 +80,5 @@ func GetAllUsersControllerPostgres(c *gin.Context) {
 	}
 	response.JsonResponse(c, 200, "Usuarios obtenidos con exito.", returnedUsers)
 }
+
+*/

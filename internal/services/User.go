@@ -10,7 +10,7 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
-func validateAndCapitaliceUser(user *models.User) error {
+func validateUserParams(user *models.User) error {
 	if err := utils.ValidateMail(user.Email); err != nil {
 		return fmt.Errorf("error validating mail: %w", err)
 	}
@@ -27,6 +27,10 @@ func validateAndCapitaliceUser(user *models.User) error {
 		return fmt.Errorf("error validating middle name: %w", err)
 	}
 
+	return nil
+}
+
+func capitaliceUserParams(user *models.User) error {
 	capitalizedName := utils.CapitalizateText(user.Name)
 	capitalizedMiddleName := utils.CapitalizateText(user.MiddleName)
 
@@ -37,7 +41,7 @@ func validateAndCapitaliceUser(user *models.User) error {
 }
 
 func findUserByEmail(ctx context.Context, email string) (uuid.UUID, error) {
-	id, err := userRepo.FindUserByEmail(ctx, email)
+	id, err := userRepo.GetIdByEmail(ctx, email)
 
 	if err != nil {
 		return uuid.Nil, fmt.Errorf("could not find user with email: %w", err)
@@ -47,69 +51,33 @@ func findUserByEmail(ctx context.Context, email string) (uuid.UUID, error) {
 }
 
 func CreateUser(ctx context.Context, user *models.User) (*models.User, error) {
-	if err := validateAndCapitaliceUser(user); err != nil {
+	if err := validateUserParams(user); err != nil {
 		return nil, fmt.Errorf("error validating user: %w", err)
 	}
+	capitaliceUserParams(user)
 
-	id, err := findUserByEmail(ctx, user.Email)
-
-	if id {
+	toFindId, err := findUserByEmail(ctx, user.Email)
+	if toFindId != uuid.Nil {
 		return nil, errors.New("user already exists with email")
 	}
-
-	return user, nil
-}
-
-func CreateUserServicePostgres(user *models.User) (*models.User, error) {
-	err := utils.ValidateUserPostgresObject(user)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("could not find user with email: %w", err)
 	}
 
-	email := user.Email
-	existUser, err := GetUserByEmailPostgres(email)
-	if existUser != nil {
-		return nil, errors.New("Ya existe usuario con el email.")
+	hashedPass, err := utils.GenerateHashedPassword(user.Password)
+	if err != nil {
+		return nil, fmt.Errorf("could not hash password: %w", err)
 	}
 
-	hashedPassword, err := utils.GenerateHashedPassword(user.Password)
+	user.Password = hashedPass
 
+	id, err := userRepo.CreateUser(ctx, user)
 	if err != nil {
-		return nil, fmt.Errorf("Could not hash password: %w", err)
-	}
-
-	user.Password = hashedPassword
-
-	id, err := userRepoPostgres.InsertOnePostgres(user)
-
-	if err != nil {
-		return nil, fmt.Errorf("%w", err)
+		return nil, fmt.Errorf("could not create user: %w", err)
 	}
 
 	user.ID = id
-
 	return user, nil
 }
 
-func GetAllUsersServicePostgres() ([]*models.User, error) {
-	users, err := userRepoPostgres.GetAllPostgres()
-
-	if err != nil {
-		return nil, err
-	}
-	return users, nil
-}
-
-func GetUserByEmailPostgres(email string) (*models.User, error) {
-	condition := models.User{Email: email}
-	user, err := userRepoPostgres.FindOnePostgres(condition)
-
-	if user == nil {
-		return nil, errors.New("Error buscar usuario con email: " + email + ". No existe.")
-	}
-
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
-}
+// buscar todos los usuarios

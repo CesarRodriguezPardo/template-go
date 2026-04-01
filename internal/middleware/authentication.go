@@ -4,8 +4,6 @@ import (
 	"CesarRodriguezPardo/template-go/config"
 	"CesarRodriguezPardo/template-go/internal/models"
 	"CesarRodriguezPardo/template-go/internal/services"
-	"CesarRodriguezPardo/template-go/utils"
-	"errors"
 	"net/http"
 	"slices"
 	"time"
@@ -19,7 +17,7 @@ import (
 )
 
 type UserClaims struct {
-	ID   uuid.UUID `json:"id""`
+	ID   uuid.UUID `json:"id"`
 	Role string    `json:"roles"`
 }
 
@@ -146,26 +144,13 @@ func AuthenticatorFunc(c *gin.Context) (interface{}, error) {
 		return "", jwt.ErrMissingLoginValues
 	}
 
-	loginUserEmail := loginValues.Email
-	loginUserPassword := loginValues.Password
+	loginEmail := loginValues.Email
+	loginPassword := loginValues.Password
 
-	user, err := services.GetUserByEmail(loginUserEmail)
-	// si se quisiera usar postgres se deberia usar entonces:
-	// user, err := services.GetUserByEmailPostgres(loginUserEmail)
+	user, err := services.AuthenticateUser(c, loginEmail, loginPassword)
 
 	if err != nil {
-		return nil, errors.New("Error al obtener el usuario")
-	}
-
-	if user == nil {
-		return nil, errors.New("Usuario no encontrado")
-	}
-
-	userPasswordHashed := user.Password
-	hashedPasswordBool := utils.CompareHashToPassword(loginUserPassword, userPasswordHashed)
-
-	if !hashedPasswordBool {
-		return nil, errors.New("Contraseña incorrecta")
+		return nil, err
 	}
 
 	userClaims := UserClaims{
@@ -173,7 +158,7 @@ func AuthenticatorFunc(c *gin.Context) (interface{}, error) {
 		Role: user.Role,
 	}
 
-	logger.Info("Login exitoso para usuario " + loginUserEmail + " desde ip: " + c.ClientIP())
+	logger.Info("Login exitoso para usuario " + loginEmail + " desde ip: " + c.ClientIP())
 
 	c.Set("user", userClaims)
 	return userClaims, nil
