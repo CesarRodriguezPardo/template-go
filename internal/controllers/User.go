@@ -45,6 +45,24 @@ func CreateUser(c *gin.Context) {
 	response.JsonResponse(c, 201, "user created", returnedUser)
 }
 
+func GetAllUsers(c *gin.Context) {
+	users, err := services.GetAllUsers(c)
+
+	if err != nil {
+		response.JsonResponse(c, 400, "invalid user data", nil)
+		return
+	}
+	/*
+		revisar cuando es nulo
+		if  {
+			response.JsonResponse(c, 400, "invalid user data", nil)
+			return
+		}
+	*/
+
+	response.JsonResponse(c, 200, "Usuarios obtenidos con exito.", users)
+}
+
 /*
 
 // GetAllUsersControllerPostgres

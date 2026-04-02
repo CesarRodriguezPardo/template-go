@@ -24,12 +24,12 @@ func ValidateMail(email string) error {
 }
 
 func ValidatePhone(phone string) error {
-	if len(phone) != 9 {
-		return errors.New("length invalid.")
-	}
-
 	if !IsNumeric(phone) {
 		return errors.New("invalid.")
+	}
+
+	if len(phone) != 9 {
+		return errors.New("length invalid.")
 	}
 
 	return nil

@@ -1,21 +1,21 @@
 services:
   postgres:
-      image: postgres:latest
-      ports:
-        - "5432:5432"
-      volumes:
-        - postgres-data:/var/lib/postgresql
-      environment:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    environment:
       - POSTGRES_USER=${DB_USER_POSTGRES}
       - POSTGRES_PASSWORD=${DB_PASS_POSTGRES}
       - POSTGRES_DB=${DB_NAME_POSTGRES}
-      networks:
-        - template-network
-      healthcheck:
-          test: ["CMD-SHELL", "pg_isready -U ${DB_USER_POSTGRES} -d ${DB_NAME_POSTGRES}"]
-          interval: 10s
-          timeout: 10s
-          retries: 5
+    networks:
+      - template-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USER_POSTGRES} -d ${DB_NAME_POSTGRES}" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
   backend:
     build:
       context: ..
@@ -24,6 +24,8 @@ services:
       - "8000:8000"
     env_file:
       - .env
+    environment:
+      - TZ=America/Santiago
     volumes:
       - storage:/app/storage
     networks:
@@ -35,7 +37,7 @@ volumes:
   storage:
   postgres-data:
 
+
 networks:
   template-network:
-    driver:
-      bridge
+    driver: bridge

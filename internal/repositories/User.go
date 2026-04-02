@@ -72,22 +72,72 @@ func (repo *UserRepository) GetAuthDataByEmail(ctx context.Context, email string
 	return user, nil
 }
 
-/*
 func (repo *UserRepository) GetAllUsers(ctx context.Context) ([]*models.User, error) {
 	query := `
-		SELECT name, middlename, email, password, phone, role FROM users
+		SELECT name, middlename, email, phone, role 
+		FROM users
 	`
+
+	rows, err := repo.DB.Pool().Query(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("get all users query: %w", err)
+	}
+	defer rows.Close()
 
 	users := []*models.User{}
 
+	for rows.Next() {
+		user := &models.User{}
 
+		err := rows.Scan(
+			&user.Name,
+			&user.MiddleName,
+			&user.Email,
+			&user.Phone,
+			&user.Role,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("scan user: %w", err)
+		}
 
+		users = append(users, user)
+	}
 
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %w", err)
+	}
+
+	return users, nil
 }
-	*/
 
 func NewUserRepository(db *database.Postgres) *UserRepository {
 	return &UserRepository{
 		DB: db,
 	}
+}
+
+const (
+	idByEmail = "SELECT id FROM users WHERE email = $1"
+	idByPhone = "SELECT id FROM users WHERE phone = $1"
+)
+
+func (r *UserRepository) GetIdByField(ctx context.Context, field, value string) (uuid.UUID, error) {
+	var query string
+
+	switch field {
+	case "email":
+		query = idByEmail
+	case "phone":
+		query = idByPhone
+	default:
+		return uuid.Nil, fmt.Errorf("invalid field")
+	}
+
+	var id uuid.UUID
+	err := r.DB.Pool().QueryRow(ctx, query, value).Scan(&id)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
+	return id, nil
 }

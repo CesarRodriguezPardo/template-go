@@ -91,7 +91,6 @@ func loadServerConfig(serverConfig *ServerConfig) {
 func loadLoggerConfig(loggerConfig *LoggerConfig) {
 	loggerConfig.Filepath = GetEnvOrDefault("FILEPATH", "/app/logs/")
 	loggerConfig.Filename = GetEnvOrDefault("FILENAME", "template-logs")
-
 	loggerConfig.Tz = GetEnvOrDefault("TZ", "America/Santiago")
 
 	if Cfg.Server.Mode == "debug" {
@@ -105,7 +104,7 @@ func loadLoggerConfig(loggerConfig *LoggerConfig) {
 
 func loadDatabaseConfig(dbConfig *DatabaseConfig) error {
 	databaseVars := []string{"DB_USER_POSTGRES", "DB_PASS_POSTGRES", "DB_HOST_POSTGRES", "DB_PORT_POSTGRES", "DB_NAME_POSTGRES"}
-	if err := CheckMissingEnv(databaseVars); err != nil{
+	if err := CheckMissingEnv(databaseVars); err != nil {
 		return err
 	}
 
@@ -123,7 +122,7 @@ func loadJWTConfig(jwtConfig *JWTConfig) error {
 	jwtVars := []string{"JWT_KEY"}
 	if err := CheckMissingEnv(jwtVars); err != nil {
 		return nil
-	} 
+	}
 
 	jwtKey := os.Getenv("JWT_KEY")
 
