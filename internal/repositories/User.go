@@ -72,6 +72,20 @@ func (repo *UserRepository) GetAuthDataByEmail(ctx context.Context, email string
 	return user, nil
 }
 
+/*
+func (repo *UserRepository) GetAllUsers(ctx context.Context) ([]*models.User, error) {
+	query := `
+		SELECT name, middlename, email, password, phone, role FROM users
+	`
+
+	users := []*models.User{}
+
+
+
+
+}
+	*/
+
 func NewUserRepository(db *database.Postgres) *UserRepository {
 	return &UserRepository{
 		DB: db,

@@ -18,7 +18,7 @@ var (
 func InitConnections() error {
 	var err error
 
-	DB, err = database.NewPG(context.Background())
+	DB, err = database.Connect(context.Background())
 
 	if err != nil {
 		return fmt.Errorf("could not connect to PG: %w", err)

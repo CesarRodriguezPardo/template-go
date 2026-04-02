@@ -9,7 +9,7 @@ import (
 func InitUserRoutes(r *gin.RouterGroup) {
 	userGroup := r.Group("/user")
 	{
-		userGroup.POST("/", controllers.CreateUserControllerPostgres)
+		userGroup.POST("/", controllers.CreateUser)
 		//userGroup.GET("/postgres", middleware.SetRoles(models.ALL), middleware.LoadJWTAuth().MiddlewareFunc(), controllers.GetAllUsersControllerPostgres)
 	}
 }

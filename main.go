@@ -64,10 +64,10 @@ func main() {
 	repositories.InitConnections()
 
 	ctx := context.Background()
-	db, err := database.NewPG(ctx)
+	db, err := database.Connect(ctx)
 
 	if err != nil {
-		logger.Fatal("meow", err)
+		logger.Fatal("could not connect to postgres", err)
 	}
 
 	services.InitRepositories(db)
@@ -75,6 +75,6 @@ func main() {
 	mailer.InitMailer()
 
 	if err := setupApp(); err != nil {
-		logger.Fatal("Moew", err)
+		logger.Fatal("could not setup app", err)
 	}
 }

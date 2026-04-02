@@ -10,7 +10,7 @@ const (
 	MaxCost  = bcrypt.MaxCost
 )
 
-func GenerateHashedPassword(password string) (string, error) {
+func GenerateHash(password string) (string, error) {
 	slicePassword := []byte(password)
 
 	hash, err := bcrypt.GenerateFromPassword(slicePassword, MinCost)

@@ -64,7 +64,7 @@ func CreateUser(ctx context.Context, user *models.User) (*models.User, error) {
 		return nil, fmt.Errorf("could not find user with email: %w", err)
 	}
 
-	hashedPass, err := utils.GenerateHashedPassword(user.Password)
+	hashedPass, err := utils.GenerateHash(user.Password)
 	if err != nil {
 		return nil, fmt.Errorf("could not hash password: %w", err)
 	}

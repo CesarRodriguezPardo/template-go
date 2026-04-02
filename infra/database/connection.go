@@ -7,6 +7,8 @@ import (
 	"net/url"
 	"sync"
 
+	logger "CesarRodriguezPardo/template-go/infra/logger"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -21,7 +23,7 @@ var (
 
 var initErr error
 
-func NewPG(ctx context.Context) (*Postgres, error) {
+func Connect(ctx context.Context) (*Postgres, error) {
 	uri := buildUri()
 
 	pgOnce.Do(func() {
@@ -31,7 +33,15 @@ func NewPG(ctx context.Context) (*Postgres, error) {
 			return
 		}
 
+		if err = db.Ping(ctx); err != nil {
+			initErr = fmt.Errorf("db.Ping: %w", err)
+			return
+		}
+
 		pgInstance = &Postgres{db}
+
+		connectData := getConnectionData()
+		logger.Info("Database - " + connectData)
 	})
 
 	return pgInstance, initErr
@@ -64,4 +74,11 @@ func buildUri() string {
 	}
 
 	return uri.String()
+}
+
+func getConnectionData() string {
+	host := config.Cfg.Database.Host
+	port := config.Cfg.Database.Port
+	data := fmt.Sprintf("host: %s, port: %s", host, port)
+	return data
 }

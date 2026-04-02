@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"CesarRodriguezPardo/template-go/internal/forms"
-	"CesarRodriguezPardo/template-go/internal/models"
 	"CesarRodriguezPardo/template-go/internal/services"
 
 	logger "CesarRodriguezPardo/template-go/infra/logger"
@@ -17,44 +16,33 @@ const (
 
 // postgres
 
-// CreateUserControllerPostgres
-// @Title CreateUserControllerPostgres
+// CreateUser
+// @Title CreateUser
 // @Description Permite crear un usuario en el sistema
 // @Summary Crea un usuario
 // @Tags Usuario
-// @Accept json
+// @Accept json9
 // @Produce json
 // @Success 200 {object} forms.UserFormPostgres "Usuario creado con exito."
 // @Router /user/postgres [post]
-func CreateUserControllerPostgres(c *gin.Context) {
+func CreateUser(c *gin.Context) {
 	var userForm *forms.UserForm
-	err := c.BindJSON(&userForm)
-
-	if err != nil {
-		response.JsonResponse(c, 500, "Error en los datos del usuario.", userForm)
+	if err := c.BindJSON(&userForm); err != nil {
+		response.JsonResponse(c, 400, "invalid user data", nil)
 		return
 	}
 
-	newUser := &models.User{
-		Name:       userForm.Name,
-		MiddleName: userForm.MiddleName,
-		Email:      userForm.Email,
-		Password:   userForm.Password,
-		Phone:      userForm.Phone,
-		Role:       userForm.Role,
-	}
+	toCreateUser := forms.UserFormToUser(userForm)
 
-	returnedUser, err := services.CreateUser(c, newUser)
+	returnedUser, err := services.CreateUser(c, toCreateUser)
 	if err != nil {
-
-		logger.Info("Intento de creación de usuario erroneo desde: " + c.ClientIP())
-
-		response.JsonResponse(c, 500, err.Error(), newUser)
+		logger.Info("failed user creation attempt from: " + c.ClientIP())
+		response.JsonResponse(c, 500, err.Error(), toCreateUser)
 		return
 	}
 
-	logger.Info("Creacion exitosa de usuario " + newUser.Email + " desde ip: " + c.ClientIP())
-	response.JsonResponse(c, 201, "Usuario creado con exito.", returnedUser)
+	logger.Info("Created user with email: " + toCreateUser.Email + " from " + c.ClientIP())
+	response.JsonResponse(c, 201, "user created", returnedUser)
 }
 
 /*

@@ -16,7 +16,6 @@ RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /root/
 
 COPY --from=builder /app/api-grd .
-COPY --from=builder /app/mailer/templates ./mailer/templates
-COPY --from=builder /app/assets ./assets
+COPY --from=builder /app/infra/mailer/templates ./mailer/templates
 
 CMD ["./api-grd"]
