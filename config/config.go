@@ -121,7 +121,7 @@ func loadDatabaseConfig(dbConfig *DatabaseConfig) error {
 func loadJWTConfig(jwtConfig *JWTConfig) error {
 	jwtVars := []string{"JWT_KEY"}
 	if err := CheckMissingEnv(jwtVars); err != nil {
-		return nil
+		return fmt.Errorf("missing jwt key")
 	}
 
 	jwtKey := os.Getenv("JWT_KEY")

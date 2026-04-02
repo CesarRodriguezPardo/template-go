@@ -7,7 +7,6 @@ import (
 )
 
 const (
-	CollectionCats  = "Cats"
 	CollectionUsers = "Users"
 )
 
@@ -15,14 +14,12 @@ var (
 	DB *database.Postgres
 )
 
-func InitConnections() error {
-	var err error
-
-	DB, err = database.Connect(context.Background())
+func InitConnections(ctx context.Context) (*database.Postgres, error) {
+	db, err := database.Connect(ctx)
 
 	if err != nil {
-		return fmt.Errorf("could not connect to PG: %w", err)
+		return nil, fmt.Errorf("could not connect to PG: %w", err)
 	}
 
-	return nil
+	return db, nil
 }

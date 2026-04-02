@@ -1,15 +1,17 @@
 # Template Go
 Repositorio base para la creacion de un servicio REST en GO. 
 
-# Old Docs
-
 se cambio de sqlc a pgx solamente y scany, no me gusto para nada sqlc y tendria q hacer mucho boilerplate xd.
 
 to do: 
     verificacion de mail
     revisar si el jwt funciona bien
+    paginacion
+    auth en crear usuario
+    
 
 
+# Old Docs
 
 El REST tiene:
  * Implementaciones para Mongo y Postgres.

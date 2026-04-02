@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"log"
 
-	"CesarRodriguezPardo/template-go/infra/database"
 	logger "CesarRodriguezPardo/template-go/infra/logger"
 
 	"github.com/gin-gonic/gin"
@@ -61,11 +60,8 @@ func main() {
 
 	logger.InitLogger()
 
-	repositories.InitConnections()
-
 	ctx := context.Background()
-	db, err := database.Connect(ctx)
-
+	db, err := repositories.InitConnections(ctx)
 	if err != nil {
 		logger.Fatal("could not connect to postgres", err)
 	}

@@ -4,6 +4,7 @@ import (
 	"CesarRodriguezPardo/template-go/internal/models"
 	"CesarRodriguezPardo/template-go/utils"
 	"context"
+	"errors"
 )
 
 func AuthenticateUser(ctx context.Context, email string, password string) (*models.User, error) {
@@ -13,8 +14,8 @@ func AuthenticateUser(ctx context.Context, email string, password string) (*mode
 	}
 
 	if utils.CompareHashToPassword(password, user.Password) {
-		return nil, err
+		return user, nil
 	}
 
-	return user, nil
+	return nil, errors.New("invalid credentials.")
 }

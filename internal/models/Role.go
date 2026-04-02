@@ -10,4 +10,4 @@ const (
 
 var ADMIN_ROLE = []Role{ADMIN}
 var WORKER_ROLE = []Role{WORKER}
-var ALL_ROLE = []Role{ALL}
+var ALL_ROLE = []Role{ADMIN, WORKER}

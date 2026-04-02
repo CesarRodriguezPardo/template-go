@@ -13,7 +13,7 @@ type User struct {
 	Email      string    `json:"email"      db:"email"`
 	Phone      string    `json:"phone"      db:"phone"`
 
-	Password string `json:"password" db:"password"`
+	Password string `json:"-" db:"password"`
 
 	Role string `json:"role" db:"role"`
 

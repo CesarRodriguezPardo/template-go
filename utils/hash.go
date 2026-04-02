@@ -13,7 +13,7 @@ const (
 func GenerateHash(password string) (string, error) {
 	slicePassword := []byte(password)
 
-	hash, err := bcrypt.GenerateFromPassword(slicePassword, MinCost)
+	hash, err := bcrypt.GenerateFromPassword(slicePassword, MaxCost)
 
 	if err != nil {
 		return "", err
