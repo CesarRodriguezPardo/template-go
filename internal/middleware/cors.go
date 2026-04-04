@@ -17,7 +17,7 @@ func CorsMiddleware() gin.HandlerFunc {
 	configCors.AllowHeaders = append(configCors.AllowHeaders, "Authorization", "Pagination-Count")
 	configCors.ExposeHeaders = append(configCors.ExposeHeaders, "Pagination-Count")
 	configCors.AllowOrigins = strings.Split(allowedCors, ",")
-	configCors.AllowCredentials = false
+	configCors.AllowCredentials = true
 
 	return cors.New(configCors)
 }

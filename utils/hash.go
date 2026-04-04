@@ -5,15 +5,15 @@ import (
 )
 
 const (
-	MinCost  = bcrypt.MinCost
-	TestCost = (MinCost + MaxCost) / 2
-	MaxCost  = bcrypt.MaxCost
+	MinCost     = bcrypt.MinCost
+	DefaultCost = 12
+	MaxCost     = bcrypt.MaxCost
 )
 
 func GenerateHash(password string) (string, error) {
 	slicePassword := []byte(password)
 
-	hash, err := bcrypt.GenerateFromPassword(slicePassword, MaxCost)
+	hash, err := bcrypt.GenerateFromPassword(slicePassword, DefaultCost)
 
 	if err != nil {
 		return "", err

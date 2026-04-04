@@ -17,7 +17,7 @@ import (
 //	@Success		200			{string}	string			"ok"
 //	@Router			/auth/login [post]
 func LoginFunc(c *gin.Context) {
-	middleware.LoadJWTAuth().LoginHandler(c)
+	middleware.GetJWTAuth().LoginHandler(c)
 }
 
 // RefreshToken : Función que permite refrescar el token jwt
@@ -29,7 +29,7 @@ func LoginFunc(c *gin.Context) {
 //	@Produce		json
 //	@Router			/auth/refresh [post]
 func RefreshToken(c *gin.Context) {
-	middleware.LoadJWTAuth().RefreshHandler(c)
+	middleware.GetJWTAuth().RefreshHandler(c)
 }
 
 // Logout : Función que permite cerrar la sesión del usuario
@@ -41,5 +41,5 @@ func RefreshToken(c *gin.Context) {
 //	@Produce		json
 //	@Router			/auth/logout [post]
 func Logout(c *gin.Context) {
-	middleware.LoadJWTAuth().LogoutHandler(c)
+	middleware.GetJWTAuth().LogoutHandler(c)
 }

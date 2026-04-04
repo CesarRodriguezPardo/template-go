@@ -8,6 +8,7 @@ to do:
     revisar si el jwt funciona bien
     paginacion
     auth en crear usuario
+    rate limit
     
 
 

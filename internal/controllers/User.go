@@ -36,8 +36,8 @@ func CreateUser(c *gin.Context) {
 
 	returnedUser, err := services.CreateUser(c, toCreateUser)
 	if err != nil {
-		logger.Info("failed user creation attempt from: " + c.ClientIP())
-		response.JsonResponse(c, 500, err.Error(), toCreateUser)
+		logger.Info("failed user creation attempt from: " + c.ClientIP() + " - " + err.Error())
+		response.JsonResponse(c, 400, err.Error(), nil)
 		return
 	}
 

@@ -68,6 +68,9 @@ func CreateUser(ctx context.Context, user *models.User) (*models.User, error) {
 	}
 	capitaliceUserParams(user)
 
+	// Forzar rol por defecto — nunca confiar en el cliente
+	user.Role = string(models.WORKER)
+
 	hashedPass, err := utils.GenerateHash(user.Password)
 	if err != nil {
 		return nil, fmt.Errorf("could not hash password: %w", err)
@@ -85,7 +88,7 @@ func CreateUser(ctx context.Context, user *models.User) (*models.User, error) {
 				return nil, errors.New("user already exists with phone number")
 			}
 		}
-		return nil, fmt.Errorf("could not create user: %w", err)
+		return nil, errors.New("could not create user")
 	}
 
 	user.ID = id

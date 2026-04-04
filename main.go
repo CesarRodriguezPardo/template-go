@@ -41,6 +41,8 @@ func setupApp() error {
 
 	initCorsMiddleware(app)
 
+	middleware.InitJWTAuth()
+
 	initSwagger(app)
 
 	routes.InitRoutes(app)

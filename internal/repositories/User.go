@@ -58,12 +58,12 @@ func (repo *UserRepository) GetIdByEmail(ctx context.Context, email string) (uui
 
 func (repo *UserRepository) GetAuthDataByEmail(ctx context.Context, email string) (*models.User, error) {
 	query := `
-		SELECT password, role FROM users
+		SELECT id, password, role FROM users
 		WHERE email = $1 
 	`
 	user := &models.User{}
 	err := repo.DB.Pool().QueryRow(ctx, query, email).
-		Scan(&user.Password, &user.Role)
+		Scan(&user.ID, &user.Password, &user.Role)
 
 	if err != nil {
 		return nil, fmt.Errorf("credentials: %w", err)

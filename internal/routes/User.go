@@ -12,6 +12,6 @@ func InitUserRoutes(r *gin.RouterGroup) {
 	userGroup := r.Group("/user")
 	{
 		userGroup.POST("/", controllers.CreateUser)
-		userGroup.GET("/", middleware.SetRoles(models.ALL), middleware.LoadJWTAuth().MiddlewareFunc(), controllers.GetAllUsers)
+		userGroup.GET("/", middleware.SetRoles(models.ADMIN, models.WORKER), middleware.GetJWTAuth().MiddlewareFunc(), controllers.GetAllUsers)
 	}
 }

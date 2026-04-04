@@ -11,7 +11,7 @@ func InitAuthRoutes(r *gin.RouterGroup) {
 	authGroup := r.Group("/auth")
 	{
 		authGroup.POST("/login", controllers.LoginFunc)
-		authGroup.POST("/refresh", middleware.LoadJWTAuth().MiddlewareFunc(), controllers.RefreshToken)
-		authGroup.POST("/logout", middleware.LoadJWTAuth().MiddlewareFunc(), controllers.Logout)
+		authGroup.POST("/refresh", middleware.GetJWTAuth().MiddlewareFunc(), controllers.RefreshToken)
+		authGroup.POST("/logout", middleware.GetJWTAuth().MiddlewareFunc(), controllers.Logout)
 	}
 }
