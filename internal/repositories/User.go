@@ -74,13 +74,13 @@ func (repo *UserRepository) GetAuthDataByEmail(ctx context.Context, email string
 
 func (repo *UserRepository) GetAllUsers(ctx context.Context) ([]*models.User, error) {
 	query := `
-		SELECT name, middlename, email, phone, role 
+		SELECT name, middle_name, email, phone, role 
 		FROM users
 	`
 
 	rows, err := repo.DB.Pool().Query(ctx, query)
 	if err != nil {
-		return nil, fmt.Errorf("get all users query: %w", err)
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -97,14 +97,14 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context) ([]*models.User, er
 			&user.Role,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("scan user: %w", err)
+			return nil, err
 		}
 
 		users = append(users, user)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("rows error: %w", err)
+		return nil, err
 	}
 
 	return users, nil

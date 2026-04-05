@@ -68,7 +68,6 @@ func CreateUser(ctx context.Context, user *models.User) (*models.User, error) {
 	}
 	capitaliceUserParams(user)
 
-	// Forzar rol por defecto — nunca confiar en el cliente
 	user.Role = string(models.WORKER)
 
 	hashedPass, err := utils.GenerateHash(user.Password)
@@ -104,5 +103,3 @@ func GetAllUsers(ctx context.Context) ([]*models.User, error) {
 
 	return users, nil
 }
-
-// buscar todos los usuarios

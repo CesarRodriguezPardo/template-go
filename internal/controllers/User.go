@@ -49,7 +49,7 @@ func GetAllUsers(c *gin.Context) {
 	users, err := services.GetAllUsers(c)
 
 	if err != nil {
-		response.JsonResponse(c, 400, "invalid user data", nil)
+		response.JsonResponse(c, 400, err.Error(), nil)
 		return
 	}
 	/*
