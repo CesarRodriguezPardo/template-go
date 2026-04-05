@@ -14,19 +14,19 @@ import (
 
 func validateUserParams(user *models.User) error {
 	if err := utils.ValidateMail(user.Email); err != nil {
-		return fmt.Errorf("error validating mail: %w", err)
+		return errors.New(err.Error())
 	}
 
 	if err := utils.ValidatePhone(user.Phone); err != nil {
-		return fmt.Errorf("error validating phone number: %w", err)
+		return errors.New(err.Error())
 	}
 
 	if err := utils.ValidateString(user.Name); err != nil {
-		return fmt.Errorf("error validating name: %w", err)
+		return errors.New(err.Error())
 	}
 
 	if err := utils.ValidateString(user.MiddleName); err != nil {
-		return fmt.Errorf("error validating middle name: %w", err)
+		return errors.New(err.Error())
 	}
 
 	return nil

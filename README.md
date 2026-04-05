@@ -9,8 +9,6 @@ to do:
     auth en crear usuario
     rate limit
     
-
-
 # Old Docs
 
 El REST tiene:
