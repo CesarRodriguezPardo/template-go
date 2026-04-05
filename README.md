@@ -4,7 +4,6 @@ Repositorio base para la creacion de un servicio REST en GO.
 se cambio de sqlc a pgx solamente y scany, no me gusto para nada sqlc y tendria q hacer mucho boilerplate xd.
 
 to do: 
-    verificacion de mail
     revisar si el jwt funciona bien
     paginacion
     auth en crear usuario

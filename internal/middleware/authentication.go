@@ -92,7 +92,7 @@ func AuthenticatorFunc(c *gin.Context) (interface{}, error) {
 		Role: user.Role,
 	}
 
-	logger.Info("logged user with email: " + loginEmail + ". From ip: " + c.ClientIP())
+	logger.Info("Logged user with email: " + loginEmail + ". From ip: " + c.ClientIP())
 
 	c.Set("user", userClaims)
 	return userClaims, nil
@@ -153,50 +153,50 @@ func IdentityHandlerFunc(c *gin.Context) interface{} {
 
 func UnauthorizedHandlerFunc(c *gin.Context, code int, message string) {
 	if message == "cookie token is empty" {
-		message = "No autorizado: token no encontrado o inválido"
+		message = "Not authorized."
 	}
 
 	userClaims := IdentityHandlerFunc(c)
 	if userClaims == nil {
-		logger.Info("Intento de petición no autenticada desde ip: " + c.ClientIP())
+		logger.Info("Non authenticated request from ip: " + c.ClientIP())
 		response.JsonResponse(c, 403, message, nil)
 		return
 	}
 
 	userMap, ok := userClaims.(map[string]interface{})
 	if !ok {
-		logger.Info("Intento de petición no autorizada (claims inválidos) desde ip: " + c.ClientIP())
+		logger.Info("Non authorized request from ip: " + c.ClientIP())
 		response.JsonResponse(c, code, message, nil)
 		return
 	}
 
 	userIDStr, _ := userMap["id"].(string)
 
-	logger.Info("Intento de petición: " + c.Request.URL.Path + ". No autorizada por usuario con id: " + userIDStr + " e ip: " + c.ClientIP())
+	logger.Info("Request: " + c.Request.URL.Path + " Not authorized from user with id: " + userIDStr + " and ip: " + c.ClientIP())
 	response.JsonResponse(c, code, message, nil)
 }
 
 func LoginResponse(c *gin.Context, code int, token string, expire time.Time) {
 	user, ok := c.Get("user")
 	if !ok {
-		response.JWTResponse(c, code, "Login fallido.", token, expire, nil)
+		response.JWTResponse(c, code, "Login failed.", token, expire, nil)
 		return
 	}
-	response.JWTResponse(c, code, "Login exitoso.", token, expire, user)
+	response.JWTResponse(c, code, "Login succesful.", token, expire, user)
 }
 
 func LogoutResponse(c *gin.Context, code int) {
 	if code != http.StatusOK {
 		c.JSON(code, gin.H{
 			"code":    code,
-			"message": "No se pudo realizar el logout.",
+			"message": "could not logout.",
 			"status":  "failed",
 		})
 		return
 	}
 	c.JSON(code, gin.H{
 		"code":    code,
-		"message": "Logout realizado con éxito.",
+		"message": "logout succesful.",
 		"status":  "success",
 	})
 }

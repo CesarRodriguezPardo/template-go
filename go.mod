@@ -4,6 +4,7 @@ go 1.25.0
 
 require (
 	github.com/appleboy/gin-jwt/v2 v2.10.3
+	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/gin-contrib/cors v1.7.6
 	github.com/gin-gonic/gin v1.12.0
 	github.com/jackc/pgx/v5 v5.6.0
