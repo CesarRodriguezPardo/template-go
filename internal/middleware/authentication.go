@@ -10,6 +10,7 @@ import (
 	jwt "github.com/appleboy/gin-jwt/v2"
 	"github.com/gin-gonic/gin"
 	uuid "github.com/satori/go.uuid"
+	"go.uber.org/zap"
 
 	logger "CesarRodriguezPardo/template-go/infra/logger"
 	response "CesarRodriguezPardo/template-go/infra/response"
@@ -92,7 +93,7 @@ func AuthenticatorFunc(c *gin.Context) (interface{}, error) {
 		Role: user.Role,
 	}
 
-	logger.Info("Logged user with email: " + loginEmail + ". From ip: " + c.ClientIP())
+	logger.Info("Logged user", zap.String("email", loginEmail), zap.String("ip", c.ClientIP()))
 
 	c.Set("user", userClaims)
 	return userClaims, nil
@@ -158,21 +159,21 @@ func UnauthorizedHandlerFunc(c *gin.Context, code int, message string) {
 
 	userClaims := IdentityHandlerFunc(c)
 	if userClaims == nil {
-		logger.Info("Non authenticated request from ip: " + c.ClientIP())
+		logger.Info("Non authenticated request", zap.String("ip", c.ClientIP()))
 		response.JsonResponse(c, 403, message, nil)
 		return
 	}
 
 	userMap, ok := userClaims.(map[string]interface{})
 	if !ok {
-		logger.Info("Non authorized request from ip: " + c.ClientIP())
+		logger.Info("Non authorized request", zap.String("ip", c.ClientIP()))
 		response.JsonResponse(c, code, message, nil)
 		return
 	}
 
 	userIDStr, _ := userMap["id"].(string)
 
-	logger.Info("Request: " + c.Request.URL.Path + " Not authorized from user with id: " + userIDStr + " and ip: " + c.ClientIP())
+	logger.Info("Request not authorized from user", zap.String("path", c.Request.URL.Path), zap.String("id", userIDStr), zap.String("ip", c.ClientIP()))
 	response.JsonResponse(c, code, message, nil)
 }
 

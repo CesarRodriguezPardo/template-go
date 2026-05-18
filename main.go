@@ -20,7 +20,8 @@ import (
 )
 
 func initApp() *gin.Engine {
-	app := gin.Default()
+	app := gin.New()
+	app.Use(middleware.GinLogger(), gin.Recovery())
 	return app
 }
 

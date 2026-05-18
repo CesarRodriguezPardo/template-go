@@ -8,6 +8,7 @@ import (
 	"sync"
 
 	logger "CesarRodriguezPardo/template-go/infra/logger"
+	"go.uber.org/zap"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -41,7 +42,7 @@ func Connect(ctx context.Context) (*Postgres, error) {
 		pgInstance = &Postgres{db}
 
 		connectData := getConnectionData()
-		logger.Info("Database - " + connectData)
+		logger.Info("Database initialized", zap.String("data", connectData))
 	})
 
 	return pgInstance, initErr

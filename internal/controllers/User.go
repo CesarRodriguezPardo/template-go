@@ -8,6 +8,7 @@ import (
 	response "CesarRodriguezPardo/template-go/infra/response"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 const (
@@ -36,12 +37,12 @@ func CreateUser(c *gin.Context) {
 
 	returnedUser, err := services.CreateUser(c, toCreateUser)
 	if err != nil {
-		logger.Info("failed user creation attempt from: " + c.ClientIP() + " - " + err.Error())
+		logger.Error("failed user creation attempt", err, zap.String("ip", c.ClientIP()))
 		response.JsonResponse(c, 400, err.Error(), nil)
 		return
 	}
 
-	logger.Info("Created user with email: " + toCreateUser.Email + " from " + c.ClientIP())
+	logger.Info("Created user", zap.String("email", toCreateUser.Email), zap.String("ip", c.ClientIP()))
 	response.JsonResponse(c, 201, "user created", returnedUser)
 }
 
