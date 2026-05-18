@@ -303,7 +303,6 @@ El proyecto está orientado de la siguiente manera:
 │   └── UserForm.go
 ├── keys
 │   └── .gitkeep
-├── logs
 ├── mailer
 │    ├── templates
 │         └── confirmCreatedUser.html

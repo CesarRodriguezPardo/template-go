@@ -5,7 +5,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -25,21 +24,10 @@ var logger *zap.Logger
 var santiago *time.Location
 
 func InitLogger() {
-
-	filepath := config.Cfg.Logger.Filepath
-	filename := config.Cfg.Logger.Filename
 	logLevel := config.Cfg.Logger.Level
 	timeZone := config.Cfg.Logger.Tz
 
-	logFilePath := filepath + filename + ".log"
-
 	consoleWriter := zapcore.AddSync(os.Stdout)
-	fileWriter := zapcore.AddSync(&lumberjack.Logger{
-		Filename:   logFilePath,
-		MaxSize:    defaultSize,
-		MaxBackups: defaultBackups,
-		MaxAge:     defaultLifeTime,
-	})
 
 	var err error
 	loc, err := time.LoadLocation(timeZone)
@@ -63,7 +51,7 @@ func InitLogger() {
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
 
-	syncer := zapcore.NewMultiWriteSyncer(consoleWriter, fileWriter)
+	syncer := zapcore.NewMultiWriteSyncer(consoleWriter)
 	encoder := zapcore.NewConsoleEncoder(*encoderConfig)
 
 	core := zapcore.NewCore(encoder, syncer, logLevel)

@@ -89,8 +89,6 @@ func loadServerConfig(serverConfig *ServerConfig) {
 }
 
 func loadLoggerConfig(loggerConfig *LoggerConfig) {
-	loggerConfig.Filepath = GetEnvOrDefault("FILEPATH", "/app/logs/")
-	loggerConfig.Filename = GetEnvOrDefault("FILENAME", "template-logs")
 	loggerConfig.Tz = GetEnvOrDefault("TZ", "America/Santiago")
 
 	if Cfg.Server.Mode == "debug" {

@@ -12,11 +12,9 @@ backend-template-buildvcs=false
 
 # carpetas que tienen datos sensibles
 # aqui se ignora todo
-logs/*
 storage/*
 
 # y aqui se agrega solamente el .gitkeep, pudiendo asi, subir la carpeta
 !storage/.gitkeep
-!logs/.gitkeep
 
 .DS_Store
