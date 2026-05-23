@@ -42,7 +42,7 @@ func (repo *UserRepository) CreateUser(ctx context.Context, user *models.User) (
 func (repo *UserRepository) GetIdByEmail(ctx context.Context, email string) (uuid.UUID, error) {
 	query := `
 		SELECT id FROM users
-		WHERE email = $1
+		WHERE email = $1 AND deleted_at IS NULL
 	`
 	var id uuid.UUID
 	err := repo.DB.Pool().QueryRow(ctx, query, email).Scan(&id)
@@ -56,10 +56,34 @@ func (repo *UserRepository) GetIdByEmail(ctx context.Context, email string) (uui
 	return id, nil
 }
 
+func (repo *UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*models.User, error) {
+	query := `
+		SELECT id, name, middle_name, email, phone, role, created_at, updated_at 
+		FROM users 
+		WHERE id = $1 AND deleted_at IS NULL
+	`
+	user := &models.User{}
+	err := repo.DB.Pool().QueryRow(ctx, query, id).Scan(
+		&user.ID,
+		&user.Name,
+		&user.MiddleName,
+		&user.Email,
+		&user.Phone,
+		&user.Role,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("UserRepository.GetUserByID: %w", err)
+	}
+
+	return user, nil
+}
+
 func (repo *UserRepository) GetAuthDataByEmail(ctx context.Context, email string) (*models.User, error) {
 	query := `
 		SELECT id, password, role FROM users
-		WHERE email = $1 
+		WHERE email = $1 AND deleted_at IS NULL
 	`
 	user := &models.User{}
 	err := repo.DB.Pool().QueryRow(ctx, query, email).
@@ -72,15 +96,25 @@ func (repo *UserRepository) GetAuthDataByEmail(ctx context.Context, email string
 	return user, nil
 }
 
-func (repo *UserRepository) GetAllUsers(ctx context.Context) ([]*models.User, error) {
+func (repo *UserRepository) GetAllUsers(ctx context.Context, limit, offset int) ([]*models.User, int, error) {
+	countQuery := `
+		SELECT COUNT(*) FROM users WHERE deleted_at IS NULL
+	`
+	var total int
+	if err := repo.DB.Pool().QueryRow(ctx, countQuery).Scan(&total); err != nil {
+		return nil, 0, err
+	}
+
 	query := `
-		SELECT name, middle_name, email, phone, role 
+		SELECT id, name, middle_name, email, phone, role 
 		FROM users
+		WHERE deleted_at IS NULL
+		LIMIT $1 OFFSET $2
 	`
 
-	rows, err := repo.DB.Pool().Query(ctx, query)
+	rows, err := repo.DB.Pool().Query(ctx, query, limit, offset)
 	if err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 	defer rows.Close()
 
@@ -90,6 +124,7 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context) ([]*models.User, er
 		user := &models.User{}
 
 		err := rows.Scan(
+			&user.ID,
 			&user.Name,
 			&user.MiddleName,
 			&user.Email,
@@ -97,17 +132,44 @@ func (repo *UserRepository) GetAllUsers(ctx context.Context) ([]*models.User, er
 			&user.Role,
 		)
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 
 		users = append(users, user)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, err
+		return nil, 0, err
 	}
 
-	return users, nil
+	return users, total, nil
+}
+
+func (repo *UserRepository) UpdateUser(ctx context.Context, user *models.User) error {
+	query := `
+		UPDATE users 
+		SET name = $1, middle_name = $2, email = $3, phone = $4, role = $5, updated_at = NOW()
+		WHERE id = $6 AND deleted_at IS NULL
+	`
+	_, err := repo.DB.Pool().Exec(ctx, query,
+		user.Name,
+		user.MiddleName,
+		user.Email,
+		user.Phone,
+		user.Role,
+		user.ID,
+	)
+	return err
+}
+
+func (repo *UserRepository) DeleteUser(ctx context.Context, id uuid.UUID) error {
+	query := `
+		UPDATE users 
+		SET deleted_at = NOW(), updated_at = NOW()
+		WHERE id = $1 AND deleted_at IS NULL
+	`
+	_, err := repo.DB.Pool().Exec(ctx, query, id)
+	return err
 }
 
 func NewUserRepository(db *database.Postgres) *UserRepository {

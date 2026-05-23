@@ -1,3 +1,8 @@
+TO DO SIOSISISISISIS:
+    ELIMINAR FORMS, CAMBIAR TODO A DTO, DTO Y RESPONSE DTO.
+
+
+
 # Template Go
 Repositorio base para la creacion de un servicio REST en GO. 
 

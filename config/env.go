@@ -25,7 +25,7 @@ func CheckMissingEnv(listedVars []string) error {
 	}
 
 	if len(missing) != 0 {
-		return fmt.Errorf("missing variables: " + strings.Join(missing, ", "))
+		return fmt.Errorf("missing variables: %s", strings.Join(missing, ", "))
 	}
 
 	return nil

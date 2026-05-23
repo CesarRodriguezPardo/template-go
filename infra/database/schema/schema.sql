@@ -7,5 +7,6 @@ CREATE TABLE users (
     password TEXT NOT NULL,
     role VARCHAR(20) NOT NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NOT NULL
+    updated_at TIMESTAMP NOT NULL,
+    deleted_at TIMESTAMP
 );

@@ -10,8 +10,13 @@ import (
 
 func InitUserRoutes(r *gin.RouterGroup) {
 	userGroup := r.Group("/user")
-	{
-		userGroup.POST("/", controllers.CreateUser)
-		userGroup.GET("/", middleware.SetRoles(models.ADMIN, models.WORKER), middleware.GetJWTAuth().MiddlewareFunc(), controllers.GetAllUsers)
-	}
+
+	adminOnly := []models.Role{models.ADMIN}
+	allRoles := []models.Role{models.ADMIN, models.WORKER}
+
+	userGroup.POST("/", middleware.SetRoles(adminOnly...), middleware.GetJWTAuth().MiddlewareFunc(), controllers.CreateUser)
+	userGroup.GET("/", middleware.SetRoles(allRoles...), middleware.GetJWTAuth().MiddlewareFunc(), controllers.GetAllUsers)
+	userGroup.GET("/:id", middleware.GetJWTAuth().MiddlewareFunc(), controllers.GetUserByID)
+	userGroup.PUT("/:id", middleware.GetJWTAuth().MiddlewareFunc(), controllers.UpdateUser)
+	userGroup.DELETE("/:id", middleware.GetJWTAuth().MiddlewareFunc(), controllers.DeleteUser)
 }

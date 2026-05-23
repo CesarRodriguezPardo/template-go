@@ -7,9 +7,9 @@ import (
 )
 
 type Data struct {
-	Token  string      `json:"token" bson:"token"`
-	Expire time.Time   `json:"expire" bson:"expire"`
-	Claims interface{} `json:"claims" bson:"claims"`
+	Token  string      `json:"token"`
+	Expire time.Time   `json:"expire"`
+	Claims interface{} `json:"claims"`
 }
 
 func JsonResponse(c *gin.Context, code int, message string, data interface{}) {
@@ -55,4 +55,27 @@ func JWTResponse(c *gin.Context, code int, message string, token string, expire 
 		Claims: claims,
 	}
 	JsonResponse(c, code, message, data)
+}
+
+type PaginatedData struct {
+	Data       interface{} `json:"data"`
+	Page       int         `json:"page"`
+	Limit      int         `json:"limit"`
+	Total      int         `json:"total"`
+	TotalPages int         `json:"total_pages"`
+}
+
+func PaginatedJsonResponse(c *gin.Context, code int, message string, data interface{}, page, limit, total int) {
+	totalPages := 0
+	if limit > 0 {
+		totalPages = (total + limit - 1) / limit
+	}
+	paginated := PaginatedData{
+		Data:       data,
+		Page:       page,
+		Limit:      limit,
+		Total:      total,
+		TotalPages: totalPages,
+	}
+	JsonResponse(c, code, message, paginated)
 }

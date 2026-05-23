@@ -6,10 +6,6 @@ import (
 	"fmt"
 )
 
-const (
-	CollectionUsers = "Users"
-)
-
 var (
 	DB *database.Postgres
 )

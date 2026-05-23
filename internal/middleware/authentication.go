@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"CesarRodriguezPardo/template-go/config"
+	"CesarRodriguezPardo/template-go/internal/dto"
 	"CesarRodriguezPardo/template-go/internal/models"
 	"CesarRodriguezPardo/template-go/internal/services"
 	"net/http"
@@ -73,7 +74,7 @@ func GetJWTAuth() *jwt.GinJWTMiddleware {
 }
 
 func AuthenticatorFunc(c *gin.Context) (interface{}, error) {
-	var loginValues models.Login
+	var loginValues dto.LoginRequest
 
 	err := c.ShouldBind(&loginValues)
 	if err != nil {
@@ -160,21 +161,21 @@ func UnauthorizedHandlerFunc(c *gin.Context, code int, message string) {
 	userClaims := IdentityHandlerFunc(c)
 	if userClaims == nil {
 		logger.Info("Non authenticated request", zap.String("ip", c.ClientIP()))
-		response.JsonResponse(c, 403, message, nil)
+		response.JsonResponse(c, http.StatusForbidden, message, nil)
 		return
 	}
 
 	userMap, ok := userClaims.(map[string]interface{})
 	if !ok {
 		logger.Info("Non authorized request", zap.String("ip", c.ClientIP()))
-		response.JsonResponse(c, code, message, nil)
+		response.JsonResponse(c, http.StatusForbidden, message, nil)
 		return
 	}
 
 	userIDStr, _ := userMap["id"].(string)
 
 	logger.Info("Request not authorized from user", zap.String("path", c.Request.URL.Path), zap.String("id", userIDStr), zap.String("ip", c.ClientIP()))
-	response.JsonResponse(c, code, message, nil)
+	response.JsonResponse(c, http.StatusForbidden, message, nil)
 }
 
 func LoginResponse(c *gin.Context, code int, token string, expire time.Time) {

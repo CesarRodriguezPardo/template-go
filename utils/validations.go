@@ -10,18 +10,6 @@ import (
 	"golang.org/x/text/language"
 )
 
-var allowedEmailDomain = []string{
-	"gmail.com",
-	"hotmail.com",
-	"hotmail.cl",
-	"outlook.com",
-	"outlook.cl",
-	"live.com",
-	"live.cl",
-	"yahoo.com",
-	"yahoo.es",
-}
-
 func ValidateMail(email string) error {
 	if len(email) > 254 {
 		return errors.New("invalid mail")
@@ -46,13 +34,11 @@ func ValidateMail(email string) error {
 	if !regexp.MustCompile(`^[a-zA-Z0-9._+\-%]+$`).MatchString(emailUser) {
 		return errors.New("invalid mail")
 	}
-
-	for _, d := range allowedEmailDomain {
-		if domain == d {
-			return nil
-		}
+	if len(domain) == 0 {
+		return errors.New("invalid mail")
 	}
-	return errors.New("invalid mail")
+
+	return nil
 }
 
 func IsNumeric(s string) bool {
@@ -86,7 +72,7 @@ func ValidateString(s string) error {
 	return nil
 }
 
-func CapitalizateText(s string) string {
+func CapitalizeText(s string) string {
 	loweredString := strings.ToLower(s)
 	capitalizedString := cases.Title(language.Spanish).String(loweredString)
 

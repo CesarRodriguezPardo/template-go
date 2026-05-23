@@ -1,6 +1,7 @@
 package services
 
 import (
+	"CesarRodriguezPardo/template-go/internal/dto"
 	"CesarRodriguezPardo/template-go/internal/models"
 	"CesarRodriguezPardo/template-go/utils"
 	"context"
@@ -32,43 +33,25 @@ func validateUserParams(user *models.User) error {
 	return nil
 }
 
-func capitaliceUserParams(user *models.User) {
-	capitalizedName := utils.CapitalizateText(user.Name)
-	capitalizedMiddleName := utils.CapitalizateText(user.MiddleName)
+func capitalizeUserParams(user *models.User) {
+	capitalizedName := utils.CapitalizeText(user.Name)
+	capitalizedMiddleName := utils.CapitalizeText(user.MiddleName)
 
 	user.Name = capitalizedName
 	user.MiddleName = capitalizedMiddleName
 }
 
-func findUserByField(ctx context.Context, field, value string) (uuid.UUID, error) {
-	id, err := userRepo.GetIdByField(ctx, field, value)
+func CreateUser(ctx context.Context, req *dto.CreateUserRequest) (*dto.UserResponse, error) {
+	user := req.ToModel()
 
-	if err != nil {
-		return uuid.Nil, fmt.Errorf("could not find user with field %s: %w", field, err)
-	}
-
-	return id, nil
-}
-
-/*
-func findUserByEmail(ctx context.Context, email string) (uuid.UUID, error) {
-	id, err := userRepo.GetIdByEmail(ctx, email)
-
-	if err != nil {
-		return uuid.Nil, fmt.Errorf("could not find user with email: %w", err)
-	}
-
-	return id, nil
-}
-*/
-
-func CreateUser(ctx context.Context, user *models.User) (*models.User, error) {
 	if err := validateUserParams(user); err != nil {
 		return nil, fmt.Errorf("error validating user: %w", err)
 	}
-	capitaliceUserParams(user)
+	capitalizeUserParams(user)
 
-	user.Role = string(models.WORKER)
+	if user.Role == "" {
+		user.Role = string(models.WORKER)
+	}
 
 	hashedPass, err := utils.GenerateHash(user.Password)
 	if err != nil {
@@ -91,15 +74,72 @@ func CreateUser(ctx context.Context, user *models.User) (*models.User, error) {
 	}
 
 	user.ID = id
-	user.Password = ""
-	return user, nil
+	return dto.UserToResponse(user), nil
 }
 
-func GetAllUsers(ctx context.Context) ([]*models.User, error) {
-	users, err := userRepo.GetAllUsers(ctx)
+func GetAllUsers(ctx context.Context, limit, offset int) ([]*dto.UserResponse, int, error) {
+	users, total, err := userRepo.GetAllUsers(ctx, limit, offset)
 	if err != nil {
-		return nil, fmt.Errorf("could not get users: %w", err)
+		return nil, 0, fmt.Errorf("could not get users: %w", err)
 	}
 
-	return users, nil
+	return dto.UsersToResponseList(users), total, nil
+}
+
+func GetUserByID(ctx context.Context, id uuid.UUID) (*dto.UserResponse, error) {
+	user, err := userRepo.GetUserByID(ctx, id)
+	if err != nil {
+		return nil, fmt.Errorf("could not get user: %w", err)
+	}
+
+	return dto.UserToResponse(user), nil
+}
+
+func UpdateUser(ctx context.Context, requesterRole string, requesterID uuid.UUID, targetUserID uuid.UUID, req *dto.CreateUserRequest) (*dto.UserResponse, error) {
+	// Check permissions
+	if requesterRole != string(models.ADMIN) {
+		if requesterID != targetUserID {
+			return nil, errors.New("unauthorized to edit this user")
+		}
+	}
+
+	existingUser, err := userRepo.GetUserByID(ctx, targetUserID)
+	if err != nil {
+		return nil, fmt.Errorf("could not find user: %w", err)
+	}
+
+	updatedUser := req.ToModel()
+
+	if err := validateUserParams(updatedUser); err != nil {
+		return nil, fmt.Errorf("error validating user: %w", err)
+	}
+	capitalizeUserParams(updatedUser)
+
+	updatedUser.ID = targetUserID
+
+	// Only admins can change roles; otherwise preserve existing role
+	if requesterRole != string(models.ADMIN) {
+		updatedUser.Role = existingUser.Role
+	}
+
+	err = userRepo.UpdateUser(ctx, updatedUser)
+	if err != nil {
+		return nil, fmt.Errorf("could not update user: %w", err)
+	}
+
+	return dto.UserToResponse(updatedUser), nil
+}
+
+func DeleteUser(ctx context.Context, requesterRole string, targetUserID uuid.UUID) error {
+	// Check permissions
+	if requesterRole != string(models.ADMIN) {
+		return errors.New("unauthorized to delete users")
+	}
+
+	err := userRepo.DeleteUser(ctx, targetUserID)
+	if err != nil {
+		return fmt.Errorf("could not delete user: %w", err)
+	}
+
+	return nil
 }
