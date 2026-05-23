@@ -8,17 +8,17 @@ import (
 )
 
 type User struct {
-	ID         uuid.UUID `json:"id"         db:"id"`
-	Name       string    `json:"name"       db:"name"`
-	MiddleName string    `json:"middlename" db:"middle_name"`
-	Email      string    `json:"email"      db:"email"`
-	Phone      string    `json:"phone"      db:"phone"`
+	ID         uuid.UUID `db:"id"`
+	Name       string    `db:"name"`
+	MiddleName string    `db:"middle_name"`
+	Email      string    `db:"email"`
+	Phone      string    `db:"phone"`
 
-	Password string `json:"-" db:"password"`
+	Password string `db:"password"`
 
-	Role string `json:"role" db:"role"`
+	Role string `db:"role"`
 
-	CreatedAt time.Time          `json:"created_at" db:"created_at"`
-	UpdatedAt time.Time          `json:"updated_at" db:"updated_at"`
-	DeletedAt pgtype.Timestamptz `json:"deleted_at" db:"deleted_at"`
+	CreatedAt time.Time          `db:"created_at"`
+	UpdatedAt time.Time          `db:"updated_at"`
+	DeletedAt pgtype.Timestamptz `db:"deleted_at"`
 }

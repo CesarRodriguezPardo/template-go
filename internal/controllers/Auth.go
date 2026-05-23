@@ -13,7 +13,7 @@ import (
 //	@Description	Permite validar el usuario y contraseña en el sistema y generar un token jwt. La solicitud entregara el token jwt, su fecha de expiración y el usuario autenticado.
 //	@Accept			json
 //	@Produce		json
-//	@Param			loginData	body		models.Login	true	"Credenciales de autenticación usach"
+//	@Param			loginData	body		dto.LoginRequest	true	"Credenciales de autenticación usach"
 //	@Success		200			{string}	string			"ok"
 //	@Router			/auth/login [post]
 func LoginFunc(c *gin.Context) {
